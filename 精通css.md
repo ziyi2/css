@@ -47,7 +47,7 @@
  
 覆盖
 
-> tip: 其实可见这样的代码结构从上至下处理的样式越来越特殊，这样有助于维护样式表，而防止非预期的特殊性覆盖问题。
+> 注：其实可见这样的代码结构从上至下处理的样式越来越特殊，这样有助于维护样式表，而防止非预期的特殊性覆盖问题。
 
 建立统一风格的注释则有助于快速寻找特性样式以及规划css代码
 
@@ -77,7 +77,7 @@
 /* @workaround 并不完善的权宜之计 */
 ```
 
->tip: 这些关键字称为gotcha，都是[CSSDoc项目](http://cssdoc.net) 的一部分，目的是为样式表开发一套标准的注释语法。  
+> 注：这些关键字称为gotcha，都是[CSSDoc项目](http://cssdoc.net) 的一部分，目的是为样式表开发一套标准的注释语法。  
 
 ## 可视化格式模型
 
@@ -88,7 +88,7 @@
 - 边框：内边距的区域外形成的一条线
 - 外边距：主要用于**控制元素之间的间隔**。
 
-> CSS2.1还包括outline(轮廓)属性，与border属性不同的是轮廓绘制在元素框之上，不影响元素的大小或定位，轮廓有助于修复bug?
+> 注：CSS2.1还包括outline(轮廓)属性，与border属性不同的是轮廓绘制在元素框之上，不影响元素的大小或定位，轮廓有助于修复bug?
 
 ```
 // 注意这样覆盖浏览器样式是有副作用的，例如对option元素有不利影响，因此可以使用全局reset显示设置样式
@@ -102,7 +102,7 @@
 
 IE早期版本包括IE6在**混杂模式**使用的是非标准盒模型，在混杂模式中width不仅仅是元素内容的宽度，而是内容、内边距和边框的宽度总和。
 
-> 除了使用CSS3的box-sizing属性目前最好的方法是不要给元素添加具有指定宽度的内边距，而是尝试将内边距或外边距添加到元素的父元素或子元素。
+> 注：除了使用CSS3的box-sizing属性目前最好的方法是不要给元素添加具有指定宽度的内边距，而是尝试将内边距或外边距添加到元素的父元素或子元素。
 
 #### 外边距叠加
 
@@ -118,17 +118,101 @@ CSS中有3种基本的定位机制：普通流、浮动和绝对定位。
 
 行内框在一行中水平排列，可以使用水平内边距、边框和外边距调整它们之间的水平间距，但是垂直内边距、边框和外边距不影响行内框的高度。在行内框上设置显式的高度和宽度是没有影响的。修改行内框尺寸的唯一方法是修改行高、水平边框、内边距或外边距。
 
-### 相对定位
+#### 相对定位
 
 元素仍然占据原来的空间。相对定位实际上被看做普通流定位的一部分，因为元素的位置是相对于它在普通流中的位置。
 
 
-### 绝对定位
+#### 绝对定位
 
 绝对定位使元素的位置与文档流无关，因此不占据空间，普通文档流中其他元素的布局就像绝对定位的元素不存在时一样。绝对定位的元素的位置相对于距离它最近的那个已定位的祖先元素进行定位，如果没有已定位的祖先元素，那么相对于初始包含块定位，初始包含块是HTML元素或者画布。
 
+固定定位是绝对定位的一种，相对于绝对定位的差异在于固定定位的包含块是视口。
 
+#### 浮动
 
+浮动框和绝对定位一样脱离了普通文档流。创建浮动元素可以使文本围绕该浮动元素，如果想要阻止行框围绕浮动框的外边，需要对浮动元素应用clear属性，**在清理元素时，浏览器在元素的顶上添加足够的外边距，使元素的顶边缘垂直下降到浮动框的下面**。尽管浮动元素脱离了文档流，不影响周围的元素，但是对元素进行清理实际上为前面的浮动元素留出了垂直空间。
+
+```
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8"> 
+<style> 
+.float-container {
+	background-color: gray;
+	border: 1px solid black;
+}
+	
+.float-left {
+	margin: 16px;
+	float: left;
+	background-color: blue;
+	
+}
+	
+.float-right {
+	margin: 16px;
+	float: left;
+	background-color: red;
+}
+	
+</style>
+</head>
+<body>
+	<div class="float-container">
+		<div class="float-left">float left</div>
+		<div class="float-right">float right</div>
+	</div>
+</body>
+</html>
+```
+
+> 注：此时class为float-container的容器不包含浮动元素，因为浮动元素脱离了正常文档流。所以两个浮动元素不占据空间。
+
+如果要使容器在视觉上包含浮动元素，那么需要在这个元素的某个地方应用clear属性。此时class为float-clear的元素在正常的文档流中，但是使用了清除属性后，**在该元素的顶上添加足够的外边距，使元素的顶边缘垂直下降到浮动框的下面**，因此容器就可以在视觉上包含浮动元素了。
+
+```
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8"> 
+<style> 
+.float-container {
+	background-color: gray;
+	border: 1px solid black;
+}
+	
+.float-left {
+	margin: 16px;
+	float: left;
+	background-color: blue;
+	
+}
+	
+.float-right {
+	margin: 16px;
+	float: left;
+	background-color: red;
+}
+
+.float-clear {
+	clear: both;
+}	
+	
+</style>
+</head>
+<body>
+	<div class="float-container">
+		<div class="float-left">float left</div>
+		<div class="float-right">float right</div>
+		<div class="float-clear"></div>
+	</div>
+</body>
+</html>
+```
+
+> 注：关于更多清除浮动的方法可以查看[清除和去除浮动的方法详解](https://ziyi2.github.io/2017/08/02/%E6%B8%85%E9%99%A4%E5%92%8C%E5%8E%BB%E9%99%A4%E6%B5%AE%E5%8A%A8%E7%9A%84%E6%96%B9%E6%B3%95%E8%AF%A6%E8%A7%A3.html#more)。
 
 
 
