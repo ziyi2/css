@@ -302,6 +302,24 @@ body {
       width: 920px;
       margin: 0 auto;
       text-align: left;
+      border: 1px solid #ccc;
+    }
+    .content {
+      overflow: hidden; /* 清浮动(这种清浮动的方式要考虑使用场景) */
+    }
+    .content .primary {
+      width: 650px;
+      height: 200px;
+      float: right; 
+      display: inline; /* 防止IE双外边距浮动bug */
+      background: #ccc;
+    }
+    .content .secondary {
+      width: 230px;
+      height: 200px;
+      float: left;
+      display: inline; /* 防止IE双外边距浮动bug */
+      background: #ccc;
     }
   </style>
 </head>
@@ -322,6 +340,396 @@ body {
     <div class="footer">
       <!-- page footer -->
     </div>
+  </div>
+</body>
+</html>
+```
+
+> 左右浮动元素之间产生了40px的隔离带，这个隔离带可以防止内容扩展导致浮动元素下降的问题。
+
+#### 三列浮动布局
+
+三列浮动布局其实和两列浮动布局类似，可以在两列布局的主内容中进行再分列。
+
+``` htmlbars
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>Document</title>
+  <style>
+    body {
+      text-align: center;
+    }
+    .wrapper {
+      width: 920px;
+      margin: 0 auto;
+      text-align: left;
+      border: 1px solid #ccc;
+    }
+    .content {
+      overflow: hidden; /* 清浮动 */
+    }
+    .content .primary {
+      width: 650px;
+      height: 200px;
+      float: right; /* 防止IE双外边距浮动bug */
+      display: inline;
+    }
+    .content .secondary {
+      width: 250px;
+      height: 200px;
+      float: left;
+      display: inline; /* 防止IE双外边距浮动bug */
+      background: #ccc;
+    }
+
+    .content .primary .primary {
+      width: 400px;
+      height: 100%;
+      float: left;
+      display: inline;
+      background: #ccc;
+    }
+
+    .content .primary .secondary {
+      width: 230px;
+      height: 100%;
+      float: right;
+      display: inline;
+      background: #ccc;
+    }
+  </style>
+</head>
+<body>
+  <div class="wrapper">
+    <div class="header">
+      <!-- page header content -->
+    </div>
+    <!-- 三列浮动布局 -->
+    <div class="content">
+      <div class="primary">
+        <div class="primary">
+          <!-- page primary primary content -->
+        </div>
+        <div class="secondary">
+          <!-- page primary secondary content -->
+        </div>
+      </div>
+      <div class="secondary">
+        <!-- page nav or secondary content -->
+      </div>
+    </div>
+    <div class="footer">
+      <!-- page footer -->
+    </div>
+  </div>
+</body>
+</html>
+```
+
+
+### 固定宽度、流式和弹性布局
+
+之前的浮动布局都是固定宽度的布局，固定宽度布局的缺点是无法充分利用可用空间(在高分辨率的屏幕上设计会缩小并出现在屏幕中间，在低分辨率屏幕上可能导致水平滚动)。固定宽度的布局往往适用于浏览器默认文本字号，但是只要将文本字号增加几级，可能就会导致文本挤满块框并且行长太短，阅读体验差。
+
+为了解决固定宽度带来的问题，可以采用流式布局或弹性布局替代固定宽度的布局。
+
+#### 流式布局
+
+流式布局的元素尺寸采用百分数而不是像素设置的，但是如果窗口宽度较小，行变得非常窄，也会变得很难阅读。因此又要添加以像素或em为单位的min-width，从而防止布局太窄。
+
+```htmlbars
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>Document</title>
+  <style>
+    body {
+      text-align: center;
+    }
+    .wrapper {
+      width: 76.8%; /* 设置成比例宽度 */
+      margin: 0 auto;
+      text-align: left;
+      border: 1px solid #ccc;
+
+      max-width: 125em; /* 防止容器过大 */
+      min-width: 62em; /* 防止容器过小 */
+    }
+    .content {
+      overflow: hidden; /* 清浮动 */
+    }
+    .content .primary {
+      width: 72.82%; /* 设置成比例宽度 */
+      height: 200px;
+      float: right; /* 防止IE双外边距浮动bug */
+      display: inline;
+    }
+    .content .secondary {
+      width: 25%; /* 设置成比例宽度 */
+      height: 200px;
+      float: left;
+      display: inline; /* 防止IE双外边距浮动bug */
+      background: #ccc;
+    }
+
+    .content .primary .primary {
+      width: 59.7%;
+      height: 100%;
+      float: left;
+      display: inline;
+      background: #ccc;
+    }
+
+    .content .primary .secondary {
+      width: 34.33%;
+      height: 100%;
+      float: right;
+      display: inline;
+      background: #ccc;
+    }
+  </style>
+</head>
+<body>
+  <div class="wrapper">
+    <div class="header">
+      <!-- page header content -->
+    </div>
+    <!-- 两列浮动布局 -->
+    <div class="content">
+      <div class="primary">
+        <div class="primary">
+          <!-- page primary primary content -->
+        </div>
+        <div class="secondary">
+          <!-- page primary secondary content -->
+        </div>
+      </div>
+      <div class="secondary">
+        <!-- page nav or secondary content -->
+      </div>
+    </div>
+    <div class="footer">
+      <!-- page footer -->
+    </div>
+  </div>
+</body>
+</html>
+```
+
+#### 弹性布局
+
+虽然流式布局可以充分利用空间，但是在大分辨率显示器上，行会过长让用户不舒服。而在窄窗口中或者增加文本字号时，行会变得非常短，内容很零碎，对于这个问题弹性布局是一种很好的解决方案。
+
+弹性布局相对于字号（而不是浏览器宽度）来设置元素的宽度，以em为为单位设置宽度，可以确保在字号增加时整个布局随之扩大，这可以将行长保持在可阅读的范围。与此同时，在文本字号增加时整个布局会加大，所以弹性布局会变得比浏览器窗口宽，导致水平滚动条出现，为了防止这种问题，需要在容器div上添加100%的max-width。
+
+创建弹性布局的技巧是要设置基字号，让1em大致相当于10px，大多数浏览器上默认的字号时16px，10px是16 * 62.5%。
+
+
+``` htmlbars
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>Document</title>
+  <style>
+    body {
+      font-size: 62.5%; /* 1em ~ 10px */
+      text-align: center;
+    }
+    .wrapper {
+      width: 92em; /* 已em单位设置容器宽度，内部宽度仍然使用百分数，内部宽度仍然相对于字号，可以方便修改布局的总尺寸，不必修改每个元素的宽度 */
+      margin: 0 auto;
+      text-align: left;
+      border: 1px solid #ccc;
+
+      max-width: 95%; /* 防止容器过大 */
+    }
+    .content {
+      overflow: hidden; /* 清浮动 */
+    }
+    .content .primary {
+      width: 72.82%; /* 设置成比例宽度 */
+      height: 200px;
+      float: right; /* 防止IE双外边距浮动bug */
+      display: inline;
+    }
+    .content .secondary {
+      width: 25%; /* 设置成比例宽度 */
+      height: 200px;
+      float: left;
+      display: inline; /* 防止IE双外边距浮动bug */
+      background: #ccc;
+    }
+
+    .content .primary .primary {
+      width: 59.7%;
+      height: 100%;
+      float: left;
+      display: inline;
+      background: #ccc;
+    }
+
+    .content .primary .secondary {
+      width: 34.33%;
+      height: 100%;
+      float: right;
+      display: inline;
+      background: #ccc;
+    }
+  </style>
+</head>
+<body>
+  <div class="wrapper">
+    <div class="header">
+      <!-- page header content -->
+    </div>
+    <!-- 两列浮动布局 -->
+    <div class="content">
+      <div class="primary">
+        <div class="primary">
+          page primary primary content
+        </div>
+        <div class="secondary">
+          page primary secondary content
+        </div>
+      </div>
+      <div class="secondary">
+        page nav or secondary content
+      </div>
+    </div>
+    <div class="footer">
+      <!-- page footer -->
+    </div>
+  </div>
+</body>
+</html>
+
+
+```
+
+#### 流式和弹性图像
+
+对于常规内容图像，如果希望垂直和水平伸缩以避免被剪切，可以将图像元素添加到没有设置任何尺寸的页面上，设置图像的百分数宽度，添加与图像宽度相同的max-with以避免像素失真。
+
+``` css
+
+img {
+  width: 25%;
+  max-width: 200px; /* 图片实际大小，防止失真 */
+  float: left;
+  display: inline;
+}
+
+p {
+  width: 68%;
+  float: right;
+  display: inline;
+}
+```
+
+
+
+### 高度相等列
+
+``` css
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>Document</title>
+  <style>
+    body {
+      font-size: 62.5%; /* 1em ~ 10px */
+      text-align: center;
+    }
+    .wrapper {
+      font-size: 14px;
+      width: 92em; /* 已em单位设置容器宽度，内部宽度仍然使用百分数，内部宽度仍然相对于字号，可以方便修改布局的总尺寸，不必修改每个元素的宽度 */
+      margin: 0 auto;
+      text-align: left;
+      border: 1px solid #ccc;
+      max-width: 95%; /* 防止容器过大 */
+      overflow: hidden; /* 清浮动 */
+    }
+    .box {
+      width: 25%;
+      margin: 3%;
+      float: left;
+      display: inline;
+      padding: 1em;
+      background: #ccc; 
+      padding-bottom: 100px;  /* 设置足够大的内边距，使元素溢出容器元素, 容器的overflow不仅可以清浮动，还可以将列进行裁切，实现三列登高 */
+      margin-bottom: -100px; /* 利用父外边距消除内边距带来的高度 */
+    }
+  </style>
+</head>
+<body>
+  <div class="wrapper">
+    <div class="box">
+      <h1>Ply</h1>
+      <p>
+        This is Ply, hello word. 
+        This is Ply, hello word. 
+        This is Ply, hello word. 
+        This is Ply, hello word. 
+        This is Ply, hello word. 
+        This is Ply, hello word.
+        This is Ply, hello word. 
+        This is Ply, hello word. 
+        This is Ply, hello word. 
+        This is Ply, hello word. 
+        This is Ply, hello word. 
+        This is Ply, hello word.
+        This is Ply, hello word. 
+        This is Ply, hello word. 
+        This is Ply, hello word. 
+        This is Ply, hello word. 
+        This is Ply, hello word. 
+        This is Ply, hello word.
+      </p>
+    </div>
+    <div class="box">
+      <h1>Zx</h1>
+      <p>
+        This is Ply, hello word. 
+        This is Ply, hello word. 
+        This is Ply, hello word. 
+        This is Ply, hello word. 
+        This is Ply, hello word. 
+        This is Ply, hello word.
+        This is Ply, hello word. 
+      </p>
+    </div>
+    <div class="box">
+      <h1>Zxk</h1>
+      <p>
+          This is Ply, hello word. 
+          This is Ply, hello word. 
+          This is Ply, hello word. 
+          This is Ply, hello word. 
+          This is Ply, hello word. 
+          This is Ply, hello word.
+          This is Ply, hello word. 
+          This is Ply, hello word. 
+          This is Ply, hello word. 
+          This is Ply, hello word. 
+          This is Ply, hello word. 
+          This is Ply, hello word. 
+          This is Ply, hello word.
+          This is Ply, hello word.
+        </p>
+    </div> 
   </div>
 </body>
 </html>
