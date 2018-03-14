@@ -214,6 +214,115 @@ CSS中有3种基本的定位机制：普通流、浮动和绝对定位。
 
 > 注：关于更多清除浮动的方法可以查看[清除和去除浮动的方法详解](https://ziyi2.github.io/2017/08/02/%E6%B8%85%E9%99%A4%E5%92%8C%E5%8E%BB%E9%99%A4%E6%B5%AE%E5%8A%A8%E7%9A%84%E6%96%B9%E6%B3%95%E8%AF%A6%E8%A7%A3.html#more)。
 
+### 布局
+
+CSS布局技术的根本就是3个基本概念：定位、浮动和外边距操纵。
+
+#### 计划布局
+
+把页面划分为大的结构性区域，比如容器、页眉、内容区域和页脚。最后在内容区域中寻找不同的布局结构，例如把某些信息分为两列、三列或四列。
+
+#### 设置基本结构
+
+根据计划布局，标记如下
+
+``` htmlbars
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>Document</title>
+</head>
+<body>
+  <div class="wrapper">
+    <div class="header">
+      <!-- page header content -->
+    </div>
+    <div class="content">
+      <!-- page content-->
+    </div>
+    <div class="footer">
+      <!-- page footer -->
+    </div>
+  </div>
+</body>
+</html>
+```
+
+> 注意这种写法并不是HTML5语义化的写法。
+
+##### 使用外边距让设计居中
 
 
+``` css
+ .wrapper {
+   width: 920px;
+   margin: 0 auto;
+ }
+```
 
+混杂模式的IE5.x和IE6不支持margin:auto声明，需要做hack处理，这种处理是无害的，对代码没有严重影响
+
+``` css
+body {
+  text-align: center;
+}
+.wrapper {
+  width: 920px;
+  margin: 0 auto;
+  text-align: left;
+}
+```
+
+### 基于浮动的布局
+
+ 
+浮动元素不占据文档流的任何空间，不再对包围它的块框(普通文档流)产生任何影响，因此需要对布局中各个点上的浮动元素进行清理，当然并不是连续的浮动和清理元素，而是浮动几乎所有的东西，然后让整个文档的某个结构(比如页脚)上进行一次或两次清理，也可以使用溢出方法(overflow)清理某些元素的内容。
+
+#### 两列浮动布局
+
+两列布局主要包含主内容和次要内容，其中次要内容包括站点导航等，将位于左侧。为了提高易用性和可访问性，将主内容放在次要内容的前面。为了防止右侧浮动元素被退到下面(IE中3像素文本偏移BUG和双外边距浮动BUG)，需要避免浮动布局在包含它的元素中太挤，可以不使用**水平外边距或内边距**建立隔离带，而是让一个元素向左浮动，另一个元素向右浮动，从而创建视觉上的隔离。如果一个元素的尺寸意外的增加了几个px，也不会立刻占满水平空间并下降，而只是扩展到了视觉隔离带中。
+
+
+``` htmlbars
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>Document</title>
+  <style>
+    body {
+      text-align: center;
+    }
+    .wrapper {
+      width: 920px;
+      margin: 0 auto;
+      text-align: left;
+    }
+  </style>
+</head>
+<body>
+  <div class="wrapper">
+    <div class="header">
+      <!-- page header content -->
+    </div>
+    <!-- 两列浮动布局 -->
+    <div class="content">
+      <div class="primary">
+        <!-- page main content -->
+      </div>
+      <div class="secondary">
+        <!-- page nav or secondary content -->
+      </div>
+    </div>
+    <div class="footer">
+      <!-- page footer -->
+    </div>
+  </div>
+</body>
+</html>
+```
