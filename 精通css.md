@@ -734,3 +734,107 @@ p {
 </body>
 </html>
 ```
+
+
+### 补充
+
+布局事实上是根据需求而定，例如三列等宽布局，两列布局左侧固定宽度等，根据不同的需求从而创造不同的布局。
+
+
+## bug和修复bug
+
+### 捕捉bug
+
+#### 特殊性和分类次序问题
+
+不要随便添加更特殊的选择器，只在需要细颗粒度的控制时添加更特殊的选择器。
+
+#### 外边距叠加问题
+
+``` htmlbars
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>Document</title>
+  <style>
+    .box {
+     margin: 10px;
+     background-color: #ccc;
+    }
+    .box>p {
+      margin: 40px;
+      background-color: #f5f5f5;
+    }
+  </style>
+</head>
+<body>
+  <div class="wrapper">
+    <div class="box">
+      <p>p has 20px margin</p>
+    </div> 
+    <div class="box">
+      <p>p has 20px margin</p>
+    </div> 
+  </div>
+</body>
+</html>
+```
+
+> 事实上两个类为box的div的垂直距离是20px，而并非10px，是因为div和内部的p元素垂直距离发生了叠加，形成了20px的垂直外边距，并且p元素的垂直外边距不变黑div包围，而是突出到div的顶部和底部的外边。
+
+``` htmlbars
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>Document</title>
+  <style>
+    .box {
+     margin: 10px;
+     background-color: #ccc;
+     padding: 1px; /* 修复垂直外边距叠加问题(添加border也可以) */
+    }
+
+    .box>p {
+      margin: 40px;
+      background-color: #f5f5f5;
+    }
+  </style>
+</head>
+<body>
+  <div class="wrapper">
+    <div class="box">
+      <p>p has 20px margin</p>
+    </div> 
+    <div class="box">
+      <p>p has 20px margin</p>
+    </div> 
+  </div>
+</body>
+</html>
+```
+
+> 此时两个div之间的距离是10px，并且各自包含了p元素的外边距。垂直外边距叠加的问题可以通过添加内部局和边框来修复。
+
+### 捕捉bug的基本知识
+
+使用符合标准的浏览器作为主要的开发浏览器，在能力较差的浏览器中测试页面。不要把浏览器测试留到项目快结束时，应该采用连续测试方法，在项目开发过程中用所有主浏览器检查页面。
+
+#### 隔离问题
+
+隔离问题的一种方法是在相关的元素上应用边框或轮廓，可以排除外边距叠加问题。如果框之间的间隙在IE中加倍，那么可能是遇到了IE的双外边距浮动bug。
+
+#### 创建基本测试案例
+
+排除法，删除不必要的代码，逐个删除或注释代码块，直到bug突然消失，最近删除的代码块可能导致bug。
+
+
+### 拥有布局
+
+
+
