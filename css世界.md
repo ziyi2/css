@@ -46,7 +46,7 @@ width的默认值为auto，但是却包含了4种不同的宽度表现
 
 - 1) 充分可利用空间。例如div、p这些元素的宽度默认是100%于父容器的，这种行为叫做fill-available。
 - 2) 收缩和包裹。浮动、绝对定位、inline-block元素或table元素，宽度收缩到合适，CSS3中叫做fit-content。
-- 3) 收缩到最小。在规范中被描述为min-content。
+- 3) 收缩到最小。在规范中被描述为min-content。例如table-layout为auto的表格。
 
 ``` html
 <style>
@@ -98,7 +98,7 @@ width的默认值为auto，但是却包含了4种不同的宽度表现
 ```
 > 注意span元素的width为auto。
 
-##### 外部尺寸与流体特性
+##### 外部尺寸与流体特性(block容器)
 
 - 1) 在一个容器中倒入水，水会均匀的铺满整个容器，这就是流动特性。将一个div元素放置到页面上，也会像水流一样铺满容器。这就是block容器的流动性。因此下面的写法没有任何必要
 
@@ -153,9 +153,9 @@ a {
 ```
 2) 格式化宽度。暂不说明。
 
-##### 内部尺寸与流体特性
+##### 内部尺寸与流体特性(inline-block元素，浮动元素和绝对定位元素)
 
-假如元素里面没有内容，width:auto时宽度是0，那就是应用“内部尺寸”。
+假如元素里面没有内容，width:auto时宽度是0，那就是应用“内部尺寸”。和外部尺寸表现的特性不同，外部尺寸的影响是和容器元素有关，而内部尺寸则是和元素本身的内容有关。
 
 - 1) 包裹性。按钮是“包裹性”最好的例子。按钮文字越多宽度越宽(内部尺寸特性)，如果文字足够多，会在容器的宽度处自动换行(自适应特性)。
 
@@ -175,6 +175,89 @@ a {
   </div>
 </body>
 ```
+> button元素默认display:inline-block，input按钮white-space默认是pre(类似于pre标签的行文，空白和换行等会被保留)。因此按钮会自适应换行，而input不会。
 
+
+对于一个元素如果其display属性值是inline-block，那么其里面的内容再多，只要是正常文本，宽度也不会超过容器。按钮就是典型的inline-block元素。包裹性对实际开发的作用
+
+``` html
+<style>
+  div {
+    padding: 10px;
+    border: 1px solid gold;
+    margin: 10px;
+    text-align: center;
+    width: 300px;
+  }
+
+  p {
+    display: inline-block; /* 产生包裹性 */
+    text-align: left;
+  }
+</style>
+<body>
+  <div>
+    <p>居中显示的元素</p>
+  </div>
+  <div>
+    <p>内容过多时居左显示内容过多时居左显示内容过多时居左显示</p>
+  </div>
+</body>
+```
+
+> 第一个p元素产生了居中的效果是因为整个p元素具有包裹性并且整个p元素居中，第二个p元素是因为inline-block元素内容过多宽度也不会超过容器，因此p元素虽然居中，但是p元素填充了整个div元素，而p元素本身是居左的，导致视觉上div元素的内容居左。
+
+> 除了inline-block元素，浮动元素和绝对定位元素都具有包裹性。
+
+- 2) 首选最小宽度。
+
+如果width设置为0，inline-block元素的宽度并不一定是0，因为图片和文字的权重远大于布局，此时表现的宽度就是首选最小宽度了。
+
+ - 东亚文字(例如中文)的宽度为每个汉字的最小宽度。
+ - 西方文字的最小宽度由特定的连续的英文字符单元决定，会终止于空格、短横线、问号以及其他非英文字符等(如果想要英文字符和中文字符一样，每个字符都用最小宽度单元，可以使用word-break: break-all)。
+
+``` html
+<style>
+  .ao,.tu {
+    display: inline-block;
+    width: 0; /* width设置为0，仍然有宽度 */
+    font-size: 14px;
+    line-height: 18px;
+    margin-left: 60px;
+  }
+  .ao:before,.tu:before {
+    outline: 2px solid gold;
+  }
+  .ao:before {
+    content: "love你love"
+  }
+  .tu {
+    direction: rtl;
+  }
+  .tu:before {
+    content: "我love你"
+  }
+</style>
+<div>
+  <span class="ao"></span>
+  <span class="tu"></span>
+</div>
+```
+
+- 3) 最大宽度。
+
+最大宽度就是元素可以有的最大宽度，等同于“包裹性”元素设置了white-space: norwap声明后的宽度，如果内部没有块级元素或者块级元素没有设定宽度值，“最大宽度”实际上是最大连续内联盒子的宽度。连续内联盒子是指display为inline、inline-block、inline-table等的元素(内联盒子)连在一起且中间没有任何的换行标签br或其他块级元素。
+
+``` html
+<body>
+  <div>
+    我是匿名内联盒子<span>我在inline标签内</span>
+    <button>我是一个内联盒子</button><img src="" alt="我是图片">
+    到这里连续内联盒子结束
+    <br>
+    我是匿名内联盒子<p>不好意思，这里是块级元素，连续内联盒子断开</p>
+  </div>
+</body>
+```
 
 
