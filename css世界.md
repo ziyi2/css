@@ -260,4 +260,36 @@ a {
 </body>
 ```
 
+#### width值作用的细节
+
+之前所讲的都是width:auto的作用。现在来看看width设置具体的值会有哪些表现。
+
+盒子可以分为块状盒子、内联盒子以及外在盒子、内在盒子。其中内在盒子又可以被分为4个盒子，分别是content box(content-box)、padding box(padding-box)、border box(border-box)以及margin box(没有名称且目前也没有任何使用场景, margin的背景永远是透明的，不可能作为background-clip或background-origin的属性值(现有属性有padding-box、border-box和content-box)出现)。
+
+并且width的值作用在了content box(content box是环绕着width和height给定的矩形)上。
+
+- 显示设置了width的值会使流动性丢失。
+- 元素实际的大小可能超出了width的大小(加上padding和border值)，因此容器出现页面布局错位的问题，可以采用“宽度分离原则”。
+
+#### 宽度分离原则
+
+css的width属性不与padding/border(有时候也包括margin)属性共存。
+
+``` html
+<style>
+  .father {
+    width: 180px; /* width独占一层标签，father元素用于定宽 */
+  }
+  .son { /* width:auto，由于流动性使得son填充满整个father，大小就是180px */
+    background: goldenrod;
+    border: 1px solid green;
+    padding: 20px;
+  }
+</style>
+```
+
+宽度分离原则会多使用一层标签，因此可以采用width作用细节的box-sizing属性。
+
+
+
 
