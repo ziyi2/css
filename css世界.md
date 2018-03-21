@@ -288,7 +288,271 @@ css的width属性不与padding/border(有时候也包括margin)属性共存。
 </style>
 ```
 
-宽度分离原则会多使用一层标签，因此可以采用width作用细节的box-sizing属性。
+#### 改变width/height作用的box-sizing(盒尺寸)
+
+宽度分离原则会多使用一层标签，因此可以采用width作用细节的box-sizing属性。之前说width默认是作用在content-box上的，但是box-sizing属性可以改变width的作用盒子，理论上box-sizing也可以作用在其他三个盒子上，但是实际上浏览器厂商并没有全部实现
+
+``` css
+.box {
+  box-sizing: border-box; /* 全部支持 */
+  box-sizing: content-box; /* 默认值 */
+  box-sizing: padding-box; /* firefox曾经支持 */
+  box-sizing: margin-box; /* 从未支持 */
+}
+```
+
+``` html
+<style>
+  .border-box {
+    box-sizing: border-box;
+    width: 100px;
+    background: pink;
+    border: 5px solid greenyellow;
+    padding: 10px;
+  }
+
+  .content-box {
+    /* box-sizing: content-box; */
+    margin-top: 10px;
+    width: 100px;
+    background: pink;
+    border: 5px solid greenyellow;
+    padding: 10px;
+  }
+</style>
+<body>
+  <div class="border-box">100px</div>
+  <div class="content-box">130px</div>
+</body>
+```
+
+> box-sizing为什么不支持margin-box，因为规范中说“margin的背景永远都是透明的”，如果box-sizing支持了margin-box，那么background-oirigin就会生效，背景图片就可以填充到margin区域，这不符合规范的要求。
+
+##### 如何评价 *{ box-sizing: border-box; }
+
+- 易产生没必要得消耗。例如对普通内联元素(非图片等替换元素)，box-sizing无论是什么值，对其渲染表现都没有影响，因此*对这些元素而言就是没有必要的消耗。同时对于input元素而言其border-sizing就是border-box，因此也是一种没有必要的消耗。
+
+##### box-sizing的真正作用
+
+替换元素得特性之一就是尺寸由内部元素决定，且无论其display属性值是inline还是block。而对于非替换元素，如果display属性值为block，则会具有流动性，宽度由外部尺寸决定，但是替换元素的宽度则不受display水平影响。
+
+``` html
+<style>
+  .box {
+    width: 100px;
+  }
+  textarea {
+    display: block; /* 尺寸并没有流动性特性 */
+  }
+</style>
+<body>
+  <div class="box">
+    <textarea name="" id="" cols="30" rows="10"></textarea>
+  </div>
+</body>
+```
+
+如果要使textarea的尺寸自适应box盒子的尺寸，就需要给textarea一个width:100%，那么如果想要textarea拥有padding和border，那么势必要使textarea的width、padding和border共存，如果此时不用box-sizing，而是使用宽度分离原则，那么势必要再套一层盒子，这层盒子用于控制padding和border，然后textarea控制width:100%。
+
+``` html
+<style>
+  .box {
+    width: 280px;
+    margin: 0 auto;
+  }
+  .textarea {
+    padding: 10px;
+    border: 1px solid #d0d0d5;
+    border-radius: 4px;
+    background-color: #fff;
+  }
+  textarea {
+    width: 100%;
+    padding: 0;
+    border: 0;
+    outline: 0;
+    background: none;
+    resize: none;
+  }
+</style>
+<div class="box">
+  <div class="textarea">
+    <textarea name="" id="" cols="30" rows="10"></textarea>
+  </div>
+</div>
+```
+
+此时如果使用box-sizing，就可以轻松解决问题
+
+``` html
+<style>
+  .box {
+    width: 280px;
+    margin: 0 auto;
+  }
+  textarea {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 10px;
+    border: 1px solid #d0d0d5;
+    border-radius: 4px;
+    outline: 0;
+    background: none;
+    resize: none;
+  }
+</style>
+<div class="box">
+  <textarea name="" id="" cols="30" rows="10"></textarea>
+</div>
+```
+
+
+所以box-sizing的最大初衷是解决替换元素的宽度自适应问题，因此以下css重置比较合适
+
+``` css
+input, textarea, img, vedio, object {
+  box-sizing: border-box;
+}
+```
+
+
+#### height:auto
+
+height:auto要比width:auto简单一些，因为css的默认流式水平方向的，宽度是稀缺的，高度是无限的。
+
+#### height:100%
+
+如果父元素没有具体的高度值(height:auto)，height:100%会无效。css规范指出：如果包含块的高度没有显示指定(高度由内容决定)，并且该元素不是绝对定位，则计算值为auto。因此auto*100/100=NaN。需要注意的是width没有在css规范中明确定义。但是基本上所有浏览器都表现出如下行为：
+
+
+
+``` html
+<style>
+  .box {
+    display: inline-block;
+    white-space: nowrap;
+    background-color: #d0d0d5;
+    padding: 10px;
+  }
+
+  .text {
+    display: inline-block;
+    width: 100%;
+    background-color: aquamarine;
+    color: white;
+  }
+</style>
+<div class="box">
+  <span>hello world</span>
+  <span class="text">hello width 100%</span>
+</div>
+```
+> 此时width的渲染流程：先渲染父元素，此时子元素的width:100%并没有渲染，宽度是两个span元素文字内容叠加的宽度，等渲染到最后一个span时，父元素的宽度width根据两个span元素的宽度已经固定，因此此时最后一个span的宽度就是父元素已经固定好的宽度(content-box的宽度)。因此可以发现height:100%和width:100%的浏览器渲染行为是不一样的。其实这个宽度的行为是css规范中的一种未定义行为，浏览器可以根据自己的理解自由发挥，好在浏览器都统一了这一行为(按照包含块(width:100%)的真实的计算值作为百分比计算的基数)。
+
+
+##### 如何让元素支持height:100%的效果
+
+- 设定显示的高度值
+
+``` css
+div {
+  height: 600px; /* 显示设置高度值 */
+}
+
+html, body {
+  height: 100%; /* 设置可以生效的百分比高度值 */
+}
+```
+
+- 使用绝对定位
+
+``` css
+div {
+  height: 100%; /* 此时height:100%就会有计算值，即使祖先元素的height计算为auto */
+  position: absolute;
+}
+```
+> 绝对定位元素的百分比计算是相对于padding box的(会把padding大小值计算在内)，而非绝对定位元素是相对于content box计算的。
+
+``` html
+<style>
+  .box {
+    height: 160px;
+    width: 200px;
+    padding: 30px;
+    box-sizing: border-box; /* 注意是border-box */
+    background-color: pink;
+    margin: 10px;
+    position: relative;
+    border: 1px solid blanchedalmond;
+  }
+
+  .normal {
+    height: 100%;
+    background-color: aquamarine;
+  }
+
+  .absolute {
+    height: 100%;
+    position: absolute;
+    background-color: aquamarine;
+  }
+</style>
+<!-- width:auto流动性 -->
+<div class="box">
+  <div class="normal">高度100px</div>
+</div>
+<!--  width:auto浮动元素和绝对定位元素具有包裹性 -->
+<div class="box">
+  <div class="absolute">高度158px</div>
+</div>
+```
+
+> 绝对定位元素height:100%的计算方式 160px - 2px, 因此不包裹border的高度。
+
+
+使用绝对定位实现左右各一半且占满整个容器高度
+
+``` html
+<style>
+  html,body {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    position: relative;
+  }
+  .left, .right {
+    height: 100%; /* 占满容器的高度 */
+    width: 50%;
+    position: absolute;
+    top: 0;
+    opacity: .5;
+  }
+  .left {
+    background-color: pink;
+    left: 0;
+  }
+  .right {
+    background-color: blanchedalmond;
+    right: 0;
+  }
+</style>
+<body>
+  <div class="left"></div>
+  <div class="right"></div>
+</body>
+```
+
+
+
+
+
+
+
+
+
+
+
 
 
 
