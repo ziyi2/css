@@ -544,7 +544,32 @@ div {
 ```
 
 
+### min-width/max-width和min-height/max-height的作用
 
+#### min-width/max-width
+
+min-width/max-width主要用于自适应布局或流体布局。现代桌面显示器分辨率越来越大，960px网页设计已经显得小家碧玉，而设置成1400px的大尺寸网页宽度也不合适，为了兼顾笔记本用户和大屏显示器用户，一种特定区间内得自适应布局方案是使宽度在1200~1400像素范围内。
+
+``` css
+html,body {
+  max-width: 1400px;
+  min-width: 1200px;
+  margin: 0 auto;
+}
+```
+例如防止图片在移动端展示过大影响体验
+
+``` css
+img {
+  max-width: 100%;
+  height: auto !important; /* 必需，强制height:auto可以保证宽度不超出的同时图片保持原来的比例，问题是加载时图片占据高度会从0变成计算高度，图片会有明显得瀑布式下落 */
+}
+```
+
+
+#### min-/max-初始值
+
+min-width/min-height的初始值是auto，max-width/max-height的初始值是none，注意width和height的初始值是auto。
 
 
 
