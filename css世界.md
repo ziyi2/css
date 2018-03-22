@@ -1,4 +1,4 @@
-﻿# css世界
+# css世界
 ## 流、元素和基本尺寸
 ### 块级元素
 
@@ -569,9 +569,42 @@ img {
 
 #### min-/max-初始值
 
-min-width/min-height的初始值是auto，max-width/max-height的初始值是none，注意width和height的初始值是auto。
+min-width/min-height的初始值是auto(MDN和W3C文档显示的是0，浏览器表现都是auto)，max-width/max-height的初始值是none，注意width和height的初始值是auto。证明min-height的值默认是auto不是0：
 
+``` html
+<style>
+  .box {
+    transition: min-height .3s;
+    background-color: pink;
+  }
+  .box:hover {
+    min-height: 300px;
+  }
+</style>
+<div class="box">
+  无动画效果
+</div>
+```
 
+``` html
+<style>
+  .box {
+    min-height: 0;
+    transition: min-height .3s;
+    background-color: pink;
+  }
+  .box:hover {
+    min-height: 300px;
+  }
+</style>
+<div class="box">
+  有动画效果
+</div>
+```
+
+max系列设置成none而不是auto，是因为auto容器限制子元素的高度和宽度，例如子元素800px，父元素400px，如果父元素得max-height是auto，那么使用和width一样的渲染规则，子元的max-height的值就是400px，因为max-height会覆盖height，因此子元素的800px就失效了。
+
+#### 超越!important，超越最大
 
 
 
