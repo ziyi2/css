@@ -607,6 +607,67 @@ max系列设置成none而不是auto，是因为auto容器限制子元素的高�
 #### 超越!important，超越最大
 
 
+``` html
+<style>
+  .box {
+    max-width: 200px;
+    background-color: pink;
+  }
+</style>
+<div class="box" style="width: 400px !important;">
+  width为200px
+</div>
+```
+
+>从这里可以看出max-width的权重超越了带有!important声明的width。
+
+
+``` html
+<style>
+  .box {
+    min-width: 300px;
+    max-width: 200px;
+    background-color: pink;
+  }
+</style>
+<div class="box" style="width: 400px !important;">
+  width为300px
+</div>
+```
+
+>当min-width和max-width起冲突的时候，min-width的权重超越了max-width。
+
+#### 任意高度元素的展开收起的动画技术
+
+如果高度不固定的情况下，height:0到height:auto是无法计算过度和动画效果的。此时可以利用max-height形成动画效果，只要max-height的值永远大于内容值就行
+
+
+``` html
+<style>
+  .box {
+    background-color: pink;
+    max-height: 100px;
+    overflow: hidden;
+    transition: max-height .25s;
+  }
+
+  .box:hover {
+  max-height: 666px; /* 足够高 */
+  }
+</style>
+<div class="box" style="width: 400px !important;">
+  产生动画效果产生动画效果产生动画效果产生动画效果产生动画效果产生动画效果产生动画效果产生动画效果
+  产生动画效果产生动画效果产生动画效果产生动画效果产生动画效果产生动画效果产生动画效果产生动画效果
+  产生动画效果产生动画效果产生动画效果产生动画效果产生动画效果产生动画效果产生动画效果产生动画效果
+  产生动画效果产生动画效果产生动画效果产生动画效果产生动画效果产生动画效果产生动画效果产生动画效果
+  产生动画效果产生动画效果产生动画效果产生动画效果产生动画效果产生动画效果产生动画效果产生动画效果
+</div>
+```
+
+> 提示：max-height尽量不要设置太大，max-height被overflow裁剪的部分也会计算在动画时间内，因此被裁剪部分执行的动画并没有实际视觉效果，容器给人延迟感。
+
+
+
 
 
 
