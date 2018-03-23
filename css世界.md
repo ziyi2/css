@@ -667,8 +667,41 @@ max系列设置成none而不是auto，是因为auto容器限制子元素的高�
 > 提示：max-height尽量不要设置太大，max-height被overflow裁剪的部分也会计算在动画时间内，因此被裁剪部分执行的动画并没有实际视觉效果，容器给人延迟感。
 
 
+### 内联元素
+
+#### 哪些是内联元素
+
+- 定义。内联元素是指“外在盒子”是inline级内联盒子的元素。所以display值为inline、inline-block、inline-table的元素都是内联元素，button元素默认display:inline-block，img元素默认display:inline，因此这些元素是内联元素。
+- 表现。内联元素的典型特征是可以和文字在一行显示。因此文字、图片、按钮和输入框、下拉框等原生表单控件都是内联元素。
 
 
+#### 内联盒模型
+
+``` html
+<p>匿名内联盒子<span>内联盒子</span></p>
+```
+
+> p元素的内部是【行框盒子】，【行框盒子】由一个个的【内联盒子】组成。而【包含盒子】(containing block)则是由一行一行的【行框盒子】组成。
+
+##### 幽灵空白节点
+
+此示例中，第一个div有高度，而第二个div的高度是0，是因为第一个div的span元素有一个宽度为0的空白字符(幽灵空白节点)。
+
+``` html
+<style>
+  div {
+    background-color: pink;
+  }
+
+  span {
+    display: inline-block;
+  }
+</style>
+<div><span></span></div>
+<div></div>
+```
+
+>该空白节点实际上也是一个盒子，是一个存货在于每个“行框盒子”前面，同时具有该元素字体和行高属性的0宽度的内联盒。
 
 
 
