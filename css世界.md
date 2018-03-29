@@ -731,7 +731,7 @@ max系列设置成none而不是auto，是因为auto容器限制子元素的高�
 | vedio    |   inline |  inline  |
 | select    |   inline-block |  inline-block  |
 | input    |   inline |  inline  |
-| range | file(input)    |   inline |  inline  |
+| range/file(input)    |   inline |  inline  |
 | hidden(input)    |   none |  none  |
 | button    |   inline-block |  inline-block  |
 | textarea    |   inline-block |  inline-block  |
