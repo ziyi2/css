@@ -891,7 +891,7 @@ http://www.zhangxinxu.com/wordpress/2015/03/css3-object-position-object-fit/。
   <img>
 </body>
 ```
-> 在chrome下此时和<img src="https://www.baidu.com/img/bd_logo1.png">一样。
+> 在chrome下此时和“<img src="https://www.baidu.com/img/bd_logo1.png">”一样。
 
 ``` html
 <style>
@@ -905,4 +905,13 @@ img:hover {
 ```
 
 > 在chrome下此时利用content属性把图片的内容替换掉。
+
+5. content与替换元素关系剖析
+
+content属性生成的对象称为“匿名替换元素”，因此content属性生成的内容都是替换元素。
+
+- 使用content生成的文本无法被选中。和设置了user-select:none声明一样。
+- 不能左右:empty伪类。
+- content动态生成值无法获取。
+
 
