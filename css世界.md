@@ -705,7 +705,109 @@ max系列设置成none而不是auto，是因为auto容器限制子元素的高�
 
 
 
+## 盒尺寸四大家族
 
+盒尺寸的4个盒子content box、padding box、border box和margin box分别对应content、padding、border和margin属性。
+
+### 深入理解content
+ 
+#### content与替换元素
+
+根据是否具有可替换内容，可以把元素分为替换元素和非替换元素。通过修改某个属性值呈现的内容就可以被替换的元素称为“替换元素”。例如img、object、video、iframe、select以及表单元素input、textarea都是典型的替换元素。
+
+1. 替换元素的特性：
+- 内容的外观不受页面上的css影响
+- 有自己的尺寸
+- 在很多css属性上有自己的一套表现规则，例如vertical-align的默认值是baseline，定义为字符x下边缘，但是替换元素的内容往往不可能含有字符x，替换元素的基线就被定义为元素的下边缘。
+
+2. 替换元素默认的display值
+
+所有替换元素都是内联水平元素。但是替换元素默认的display值根据不同的元素有一定的差异
+
+| 元素      |     chrome |   ie   |
+| :-------- | --------:| :------: |
+| img    |   inline |  inline  |
+| iframe    |   inline |  inline  |
+| vedio    |   inline |  inline  |
+| select    |   inline-block |  inline-block  |
+| input    |   inline |  inline  |
+| range | file(input)    |   inline |  inline  |
+| hidden(input)    |   none |  none  |
+| button    |   inline-block |  inline-block  |
+| textarea    |   inline-block |  inline-block  |
+
+> 替换元素的display是inline、block和inline-block中的任意一个，其尺寸计算规则都是一样的。
+
+
+3. 尺寸计算规则
+
+- 固有尺寸。图片和视频等作为一个独立文件有自己的宽度和高度。
+- HTML尺寸。通过HTML原生属性改变元素尺寸，例如img的width和height属性，input的size属性，textarea的cols和rows属性等。
+- css尺寸。通过设置css的width和height或者max-width/min-width和max-height/min-height设置尺寸，对应盒尺寸的content box。
+
+> 三个尺寸的优先级分别是 css尺寸 > HTML尺寸 > 固有尺寸。
+
+- 默认是图片的尺寸在起作用。
+
+``` html
+<body>
+  <p>固有尺寸：540px X 258px</p>
+  <img src="https://www.baidu.com/img/bd_logo1.png" alt="">
+
+</body>
+```
+
+- 没有CSS尺寸的前提下，HTML尺寸起作用。
+
+``` html
+<body>
+  <p>HTML尺寸：540px X 258px</p>
+  <img src="https://www.baidu.com/img/bd_logo1.png" width="128" height="96" alt="">
+</body>
+```
+
+- 三者尺寸都有的前提下，CSS尺寸起作用。需要注意如果CSS尺寸只设置了宽度或高度，则依然按照图片固有尺寸的宽高比例显示。
+
+``` html
+<p>固有尺寸：540px X 258px</p>
+<img src="https://www.baidu.com/img/bd_logo1.png" alt="">
+<p>HTML尺寸：128px X 96px</p>
+<img src="https://www.baidu.com/img/bd_logo1.png" width="128" height="96" alt="">
+<p>CSS尺寸：200px X 100px</p>
+<img class="cssContent" src="https://www.baidu.com/img/bd_logo1.png" width="128" height="96" alt="">
+```
+- 如果上述条件都不符合，则最终宽度表现为300px，高度变现为150px。例如<vedio></vedio>（chrome下是0x0）、<canvas></canvas>。
+
+- 内联替换元素和块级替换元素使用上面同一套尺寸计算规则。
+
+
+``` html
+<style>
+.cssContent {
+  width: 200px;
+  height: 100px;
+}
+
+.cssBlock {
+  display: block;
+}
+</style>
+
+<body>
+  <p>固有尺寸：540px X 258px</p>
+  <img src="https://www.baidu.com/img/bd_logo1.png" alt="">
+  <p>HTML尺寸：128px X 96px</p>
+  <img src="https://www.baidu.com/img/bd_logo1.png" width="128" height="96" alt="">
+  <p>CSS尺寸：200px X 100px</p>
+  <img class="cssContent" src="https://www.baidu.com/img/bd_logo1.png" width="128" height="96" alt="">
+  <vedio></vedio> 
+  <canvas></canvas>
+  <p>宽度并没有默认的100%</p>
+  <img class="cssBlock" src="https://www.baidu.com/img/bd_logo1.png" alt="">
+</body>
+```
+
+> 尽管img变成了块级元素，但是width并没有变成100%。
 
 
 
