@@ -809,5 +809,100 @@ max系列设置成none而不是auto，是因为auto容器限制子元素的高�
 
 > 尽管img变成了块级元素，但是width并没有变成100%。
 
+- 图片有例外情况
 
+``` html
+<body>
+  <img>
+  <img src="">
+</body>
+```
+
+> chrome下是0px X 0px，而ie下是28px X 30px。firefox下是0px X 19px。 按照规范尺寸则应该是300px X 150px。需要注意src=""是会发起请求的，而src属性缺省则不会发起请求。
+
+
+``` html
+<style>
+  img {
+    width: 200px;
+    height: 100px;
+  }
+</style>
+<body>
+  <img>
+</body>
+```
+
+> ie和chrome下css样式生效，而在firefox下还是0px X 19px。解决方法是将img显示为内联块级元素inline-block。
+
+- 无法改变替换元素内容的固有尺寸。
+
+``` html
+<style>
+  div:before {
+    width: 200px;
+    height: 100px;
+    content: url("https://www.baidu.com/img/bd_logo1.png")
+  }
+</style>
+<body>
+  <div></div>
+</body>
+```
+
+> 图片的尺寸是固有的，无法被改变。
+
+既然图片是固有尺寸，为什么修改img的width和height能修改图片的大小，可以查看
+http://www.zhangxinxu.com/wordpress/2015/03/css3-object-position-object-fit/。
+
+4. 替换元素和非替换元素
+
+- 替换元素和非替换元素之间只隔了一个src属性。如果把img元素的src属性去掉，就成了和span类似的普通内联元素，也就是非替换元素。
+
+
+``` html
+<style>
+  img {
+    outline: 1px solid;
+    display: block;
+  }
+</style>
+<body>
+  <img>
+  <img alt="img">
+  <img alt="chrome 100%">
+</body>
+```
+> firefox下的宽度是100%自适应的。chrome带特定的alt条件能够宽度自适应。
+
+
+- 替换元素和非替换元素之间只隔了一个CSS content属性。
+
+``` html
+
+<style>
+  img {
+    content: url("https://www.baidu.com/img/bd_logo1.png");
+    width: 100px;
+    height: 200px;
+  }
+</style>
+<body>
+  <img>
+</body>
+```
+> 在chrome下此时和<img src="https://www.baidu.com/img/bd_logo1.png">一样。
+
+``` html
+<style>
+img:hover {
+  content: url(https://img02.sogoucdn.com/app/a/100520122/a363a0b1_loulan.gif);
+}
+</style>
+<body>
+  <img src="https://www.baidu.com/img/bd_logo1.png">
+</body>
+```
+
+> 在chrome下此时利用content属性把图片的内容替换掉。
 
