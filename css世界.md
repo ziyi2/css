@@ -914,4 +914,250 @@ content属性生成的对象称为“匿名替换元素”，因此content属性
 - 不能左右:empty伪类。
 - content动态生成值无法获取。
 
+#### content内容生成技术
 
+"content内容生成技术"也称为":before/:after"伪元素技术。
+
+1. content辅助元素生成
+
+``` html
+<style>
+div:before {
+  content: ''
+}
+</style>
+<body>
+  <div></div>
+</body>
+``` 
+
+> 利用空字符串和其他CSS代码来生成辅助元素，或实现图形效果或实现特定布局。与使用HTML标签相比这样做的好处是HTML代码会显得更加干净和精简。
+
+``` html
+<style>
+  div:after {
+    content: '';
+    display: table; /* 也可以是block */
+    clear: both;
+  }
+</style>
+<body>
+  <div></div>
+</body>
+```
+> 清除浮动。
+
+
+2. content字符内容生成
+3. content图片生成
+4. 了解content开启闭合符号生成
+5. content attr属性值内容生成
+
+``` html
+<style>
+  img:before {
+    content: attr(data-title); /* 生成alt内容 */ 
+  }
+
+  div:after {
+    content: attr(data-title); /* 生成data-title内容 */ 
+  }
+</style>
+<body>
+  <img src="https://www.baidu.com/img/bd_logo1.png" data-title="百度图片" />
+  <div data-title="data-title content">div content</div>
+</body>
+```
+
+6. 深入理解content计数器
+
+- counter-reset: 计数器重置
+- counter-increment: 计数器递增
+- counter()/counters():  方法，用于显示计数
+
+
+``` html
+<style>
+  .counter {
+    counter-reset: ziyi2 2;
+    counter-increment: ziyi2;
+    font-size: 32px;
+    font-family: Arial Black;
+    color: pink;
+  }
+
+  .counter:before {
+    content: counter(ziyi2);
+  }
+</style>
+<body>
+  <p>ziyi2: </p>
+  <p class="counter"></p>
+</body>
+```
+
+> 这里显示3。
+
+
+``` html
+<style>
+  .counter {
+    counter-reset: ziyi2 2 ziyi3 3;
+    counter-increment: ziyi2 ziyi3;
+    font-size: 32px;
+    font-family: Arial Black;
+    color: pink;
+  }
+
+  .counter:before {
+    content: counter(ziyi2);
+  }
+  .counter:after {
+    content: counter(ziyi3);
+  }
+</style>
+<body>
+  <p>ziyi2: </p>
+  <p class="counter"></p>
+</body>
+```
+
+> 这里显示34。
+
+``` html
+<style>
+  .counter {
+    counter-reset: ziyi2 2 ziyi3 3;
+    counter-increment: ziyi2 ziyi3;
+    font-size: 32px;
+    font-family: Arial Black;
+    color: pink;
+  }
+
+  .counter:before {
+    counter-increment: ziyi2 ziyi3;
+    content: counter(ziyi2);
+  }
+  .counter:after {
+    counter-increment: ziyi2 ziyi3;
+    content: counter(ziyi3);
+  }
+</style>
+<body>
+  <p>ziyi2: </p>
+  <p class="counter"></p>
+  <p class="counter"></p>
+</body>
+
+```
+
+> 这里ziyi2递增了2次(after那一次递增是后面递增的)，ziyi3递增了3次，所以显示46。
+
+
+``` html
+<style>
+  .counter {
+    counter-reset: ziyi2 2 ziyi3 3;
+    counter-increment: ziyi2 ziyi3;
+    font-size: 32px;
+    font-family: Arial Black;
+    color: pink;
+  }
+
+  .counter:before {
+    counter-increment: ziyi2 ziyi3;
+    content: counter(ziyi2);
+  }
+  .counter:after {
+    counter-increment: ziyi2 ziyi3;
+    content: counter(ziyi3);
+  }
+
+  .counter1:before {
+    font-size: 32px;
+    font-family: Arial Black;
+    color: pink;
+    content: counter(ziyi2);
+  }
+</style>
+<body>
+  <p>ziyi2: </p>
+  <p class="counter"></p>
+  <p class="counter1"></p>
+</body>
+```
+
+> 此时counter显示的是46，而counter因为counter的after又递增了一次，所以显示5。
+
+
+``` html
+<style>
+  .counter {
+    counter-reset: ziyi2 2 ziyi3 3;
+    counter-increment: ziyi2 ziyi3;
+    font-size: 32px;
+    font-family: Arial Black;
+    color: pink;
+  }
+
+  .counter:before {
+    counter-increment: counter 3;
+    content: counter(ziyi2, lower-roman); /* counter(name, style) */
+  }
+  .counter:after {
+    display: block;
+    counter-increment: ziyi2 ziyi3;
+    content: counter(ziyi3, '~'); /* counter(name, style) */
+  }
+</style>
+<body>
+  <p>ziyi2: </p>
+  <p class="counter"></p>
+</body>
+```
+
+> 显示罗马数字。
+
+
+
+``` html
+<style>
+  .reset {
+    padding-left: 20px;
+    counter-reset: ziyi2;
+  }
+
+  .counter:before {
+    content: counters(ziyi2, '-') '. '; /* 这是一种content内容生成混合特性，可以让字符.跟在计数值后 */
+    counter-increment: ziyi2;
+  }
+</style>
+<body>
+  <div class="reset">
+    <div class="counter">
+       1
+      <div class="reset">
+        <div class="counter">
+           1-1
+        </div>
+        <div class="counter">
+           1-2
+        </div>
+      </div>
+    </div>
+    <div class="counter">
+         2
+        <div class="reset">
+          <div class="counter">
+             2-1
+          </div>
+          <div class="counter">
+             2-2
+          </div>
+        </div>
+      </div>
+  </div>
+</body>
+```
+
+> counters的用法是counters(name, string)。这样就实现了书目录的排布。
