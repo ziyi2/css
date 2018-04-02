@@ -1161,3 +1161,383 @@ div:before {
 ```
 
 > counters的用法是counters(name, string)。这样就实现了书目录的排布。
+
+
+### 温和的padding属性
+
+#### padding与元素尺寸
+
+css默认的box-sizing是content-box，因此padding会增加元素的尺寸。
+
+``` html
+<style>
+  .box {
+    padding: 20px 60px;
+    width: 80px;
+    box-sizing: border-box;
+    background-color: pink;
+  }
+</style>
+<body>
+  <div class="box"></div>
+</body>
+```
+
+> 此时width会无效，因为padding的两个60px正好占据了width的大小。
+
+
+``` html
+<style>
+  .box {
+    padding: 20px 60px;
+    width: 80px;
+    box-sizing: border-box;
+    background-color: pink;
+  }
+
+  a.link {
+    padding: 20px;
+    background-color: aqua;
+    text-decoration: none;
+  }
+</style>
+<body>
+  <div class="box"></div>
+  <div><a class="link" href="">链接</a></div>
+  <div class="box"></div>
+</body>
+```
+
+>内联元素的padding不仅会影响水平方向，也会影响垂直方向。内联元素没有可视宽度和可视高度的说法(clientHeight和clientWidth永远是0)，垂直方向的行为也完全受line-height和vertical-align的影响，这个例子在视觉上并没有改变上一行和下一行内容的间距(上下元素原本的布局没有任何影响)，只是a标签的尺寸明显受到padding影响，导致在垂直方向上发生了层叠。a的padding覆盖了box的区域。
+
+
+CSS中有很多其他场景或属性会出现这种不影响其他元素布局而出现层叠效果的现象。例如relative元素的定位、盒阴影box-shadow以及outline等。这些层叠现象实际上可分为两类： 
+- 纯视觉层叠，不影响外部尺寸(盒阴影box-shadow以及outline)
+- 会影响外部尺寸(inline元素的padding，例如以上例子影响了a元素的尺寸)
+
+给元素的父元素增加overflow:auto，层叠区域超出父容器会出现滚动条，这会影响尺寸、影响布局，没有出现滚动条这是纯视觉层叠。
+
+
+``` html
+
+<style>
+  .box {
+    padding: 20px 60px;
+    width: 80px;
+    box-sizing: border-box;
+    background-color: pink;
+    width: 200px;
+  }
+
+  div {
+    overflow: auto;
+    width: 200px;
+  }
+
+  a.link {
+    padding: 20px;
+    background-color: aqua;
+    text-decoration: none;
+  }
+</style>
+<body>
+  <div class="box"></div>
+  <div><a class="link" href="">链接</a></div>
+  <div class="box"></div>
+</body>
+```
+
+>此时第2个div出现了滚动条。所以说垂直方向padding对内联元素没有作用的说法是错误的。
+
+
+padding元素也有一些其他作用，例如实现高度可控的分割线。
+
+
+``` html
+<style>
+  a {
+    text-decoration: none;
+  }
+  a + a:before {
+    content: '';
+    font-size: 0;
+    padding: 10px 3px 1px; /* 注意border在左padding的左边 */
+    margin-left: 6px; /* 为了实现border居中，margin值是两倍的水平padding值 */
+    border-left: 1px solid grey;
+  }
+</style>
+<body>
+  <a href="">登录</a><a href="">注册</a>
+</body>
+```
+
+> 此时控制上下padding就可以控制分割线的大小。控制左右padding就可以控制两个a标签之间的分割线距离(注意同时要调成margin)。
+
+#### padding的百分比值
+
+padding的百分比值无论是水平还是垂直方向都是相对于宽度（父元素）计算的。因为垂直高度height大多数情况下计算值可能是0，因为相对于高度计算很多情况下会失效。
+
+``` html
+<style>
+  .box {
+    padding: 10% 50%;
+    position: relative;
+  }
+
+  .box > img {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    left: 0;
+    top: 0;
+  }
+</style>
+<body>
+  <div class="box">
+    <img src="https://www.baidu.com/img/bd_logo1.png" alt="">
+  </div>
+</body>
+```
+
+> box的width为0，因此box的宽高比例始终为5:1，因此图片的比例始终是5:1大小，而且图片可以天然等比例缩小放大。
+
+如果padding百分比应用于内联元素
+
+- 同样相对于宽度计算
+- 默认的高度和宽度细节有差异
+- padding会断行
+
+
+``` html
+<style>
+  div {
+    width: 200px;
+  }
+  span {
+    padding: 50%;
+    background-color: gray;
+  }
+</style>
+<body>
+  <div>
+    <span>内有若干文字</span>
+  </div>
+</body>
+```
+
+> 由于字体的换行导致padding跟着换行。
+
+
+``` html
+<style>
+  div {
+    width: 200px;
+  }
+  span {
+    padding: 50%;
+    background-color: gray;
+  }
+</style>
+<body>
+  <div>
+    <span></span>
+  </div>
+</body>
+```
+
+>此时高度和宽度不一样，因为幽灵空白节点的出现。导致高度和宽度大，因为幽灵空白节点占据行高。
+
+
+``` html
+<style>
+  div {
+    width: 200px;
+  }
+  span {
+    padding: 50%;
+    font-size: 0;
+    background-color: gray;
+  }
+</style>
+<body>
+  <div>
+    <span></span>
+  </div>
+</body>
+```
+
+> 此时幽灵空白节点的高度变成了0，span的宽高一样。
+
+#### 标签元素内置的padding
+
+- input/textarea输入框内置padding
+- button内置padding
+- 部分浏览器下拉内置padding
+- radio/checkbox单复选框无内置padding
+- button按钮的padding最难控制
+
+``` html
+<style>
+  button {
+    padding: 0;
+  }
+  /* Firefox需要额外的控制才能清除button的内置padding */
+  button::-moz-focus-inner {
+    padding: 0;
+  }
+</style>
+<body>
+  <button>按钮</button>
+</body>
+```
+
+以上设置对于IE7浏览器仍然无效，IE7下会随着文字变多padding逐渐变大，因此需要设置button { overflow: visible; }才能去除padding。
+
+#### padding与图形绘制
+
+``` html
+<style>
+  .icon-menu {
+    display: inline-block;
+    width: 140px;
+    height: 10px;
+    padding: 35px 0;
+    border-top: 10px solid #666;
+    border-bottom: 10px solid #666;
+    background-color: #666;
+    background-clip: content-box;  /* 背景绘制在内容方框内（剪切成内容方框） */
+  }
+
+  .icon-dot {
+    display: inline-block;
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    padding: 10px;
+    border: 10px solid #666;
+    background-color: #666;
+    background-clip: content-box;
+  }
+</style>
+<body>
+  <i class="icon-menu"></i>
+  <i class="icon-dot"></i>
+</body>
+```
+
+
+## 激进的margin属性
+
+1. 元素尺寸的相关概念
+
+- 元素尺寸： 包括padding和border，元素border-box的尺寸。DOM API中写作offsetWidth和offsetHeight，也称为“元素偏移尺寸”。
+- 元素内部尺寸：包括padding但是不包括border，元素padding-box的尺寸。DOM API写作clientWidth和client Height，也称为“元素可视尺寸”。
+- 元素外部尺寸：包括padding、border和margin，元素margin-box的尺寸。没有对应的DOM API。
+
+
+2. margin与元素内部尺寸
+
+margin可以改变元素的内部尺寸，但和padding施互补态势。
+
+
+``` html
+<style>
+  div {
+    width: 300px;
+    height: 300px;
+    background-color: pink;
+    margin: 0 -20px;
+  }
+</style>
+<body>
+   <div></div>
+</body>
+```
+> 此时div内部尺寸不变。只要宽度设定，margin就无法改变元素的尺寸。此时元素div保持了“包裹性”，因此margin设值对于元素尺寸没有影响。
+
+``` html
+
+ <style>
+    div.father {
+      width: 300px;
+      height: 300px;
+      border: 1px solid pink;
+    }
+
+    div.son {
+      height: 100%;
+      margin: 0 -20px;
+      border: 1px solid pink;
+    }
+  </style>
+<body>
+   <div class="father">
+     <div class="son"></div>
+   </div>
+</body>
+```
+
+> 此时son的大小就变成了340p宽度了。此时虽然father具有“包裹性”，但是son是“流体特性”，是“充分利用可利用空间”的状态，因此此时margin可以改变元素的内部尺寸。
+
+
+但是以上例子并不会改变元素的高度，只会在水平方向改变元素的尺寸。因为CSS的世界默认的流方向是水平方向，因此对于普通流元素，margin能改变元素水平方向的尺寸，而垂直方向不行(其实是因为垂直方向没有流体特性，不符合“充分可利用空间，注意height:100%和具有流体特性是不同的”)。但是对于具有拉伸特性的绝对定位元素，则水平或垂直方向都可以。
+
+
+``` html
+<style>
+  div.father {
+    width: 300px;
+    height: 300px;
+    margin: 0 auto;
+    position: relative
+  }
+
+  div.son {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    margin: -20px -20px;
+    background-color: pink;
+  }
+</style>
+<body>
+   <div class="father">
+     <div class="son"></div>
+   </div>
+</body>
+```
+> 此时son的大小为340px X 340px。
+
+利用margin可以实现布局，例如实现左列定宽，右列自适应布局。
+
+
+``` html
+<style>
+  .container:after {
+    display: table;
+    content: '';
+    clear: both;
+  }
+  .container .left {
+    float: left;
+    width: 200px;
+    height: 200px;
+    background-color: pink;
+  }
+  .container .right { /* 流体特性和margin改变内部尺寸 */
+    margin-left: 220px; 
+    height: 200px;
+    background-color: pink;
+  }
+</style>
+<body>
+  <div class="container">
+    <div class="left"></div>
+    <div class="right"></div>
+  </div>
+</body>
+```
+
+
