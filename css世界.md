@@ -1540,4 +1540,163 @@ margin可以改变元素的内部尺寸，但和padding施互补态势。
 </body>
 ```
 
+3. margin与元素的外部尺寸
+
+使用margin外部尺寸实现等高布局
+
+``` html
+<style>
+  .container {
+    overflow: hidden
+  }
+
+  .left, .right {
+    width: 50%;
+    float: left;
+    margin-bottom: -9999px;
+    padding-bottom: 9999px;
+    background-color: pink;
+  }
+
+  .right {
+    background-color: aqua;
+  }
+</style>
+<body>
+  <div class="container">
+    <div class="left">
+      <p>1</p>
+      <p>1</p>
+      <p>1</p>
+      <p>1</p>
+    </div>
+    <div class="right">
+      <p>1</p>
+      <p>1</p>
+      <p>1</p>
+      <p>1</p>
+      <p>1</p>
+      <p>1</p>
+    </div>
+  </div>
+</body>
+```
+
+
+>无论是左侧内容多还是右侧内容多，两栏的背景高度是一样的。使用margin-bottom: -9999px会使后面的所有元素往上移动9999px，会破坏布局，但是通过padding-bottom:9999px可以修复这个问题，增加了元素内部尺寸的同时又使后面的元素往下移动了9999px，从而对布局层不会产生影响，同时我们知道background默认是作用在content-box上的，因此padding区域能产生背景色，但是9999px的背景色太大了，因此给父元素一个overflow:hidden把多出来的色块背景隐藏掉，于是在视觉上呈现了等高布局效果。
+
+
+- margin等高布局限制：如果子元素定位到容器之外，父级的overflow:hidden是一个限制。同时如果触发锚点定位或者使用DOM.scrollIntoview()方法的时候可能会出现奇怪的定位问题。
+- border边框模拟：兼容性足够好，没有锚点定位的隐患，最多只能3栏，且border不支持百分比宽度，只能实现至少一侧定宽布局。
+- table-cell布局：优点是天然登高，不足是IE8以上浏览器才支持，如果不需要支持IE67则推荐使用这个等高布局方式。
+- 伪table-cell布局：不需要考虑table的语义，没有语义且可以像table那样布局，html的层次结构相比直接用table元素也要简单一些，我们这里只用到了3层，直接用table元素的话可能还有tbody这一层，缺点是分栏之间的间隔不能用margin和padding来做，如果用margin，这个属性在display: table-cell的元素上根本不会生效；如果用padding，那像demo里面各栏的背景色就都会连到一块，做不出间隔的效果，如果在layout__col里面再嵌套一层，在这一层设置背景色的话，又会增加html的层次，也不是很好。
+
+
+4. 实现等高布局的几种方法
+
+- 伪table-cell布局
+
+``` html
+<style>
+  .table {
+    display: table;
+    width: 100%;
+  }
+  .table-row {
+    display: table-row;
+  }
+  .table-col {
+    text-align: center;
+    display: table-cell;
+  }
+
+  .left,.right {
+    background-color: #daf1ef;
+  }
+
+  .center {
+    background-color: #4DBCB0;
+  }
+
+</style>
+<body>
+  <div class="table">
+    <div class="table-row">
+      <div class="table-col left">
+        <p>1</p>
+        <p>1</p>
+        <p>1</p>
+        <p>1</p>
+        <p>1</p>
+      </div>
+      <div class="table-col center">
+        <p>1</p>
+        <p>1</p>
+        <p>1</p>
+        <p>1</p>
+      </div>
+      <div class="table-col right">
+        <p>1</p>
+        <p>1</p>
+        <p>1</p>
+      </div>
+    </div>
+  </div>
+</body>
+```
+
+> 使用table-cell布局的好处是天然等高布局，以上实现了宽度自适用的三列等宽等高布局。
+
+
+``` html
+<style>
+  .table {
+    display: table;
+    width: 100%;
+  }
+  .table-row {
+    display: table-row;
+  }
+  .table-col {
+    text-align: center;
+    display: table-cell;
+  }
+
+  .left,.right {
+    background-color: #daf1ef;
+    width: 200px; /* 两边固定宽度，中间自适应宽度 */
+  }
+
+  .center {
+    background-color: #4DBCB0;
+  }
+</style>
+<body>
+  <div class="table">
+    <div class="table-row">
+      <div class="table-col left">
+        <p>1</p>
+        <p>1</p>
+        <p>1</p>
+        <p>1</p>
+        <p>1</p>
+      </div>
+      <div class="table-col center">
+        <p>1</p>
+        <p>1</p>
+        <p>1</p>
+        <p>1</p>
+      </div>
+      <div class="table-col right">
+        <p>1</p>
+        <p>1</p>
+        <p>1</p>
+      </div>
+    </div>
+  </div>
+</body>
+```
+
+> 此时实现了两端定宽，中间自适应的布局。
+
 
