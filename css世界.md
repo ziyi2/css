@@ -1699,4 +1699,4 @@ margin可以改变元素的内部尺寸，但和padding施互补态势。
 
 > 此时实现了两端定宽，中间自适应的布局。
 
-
+https://www.cnblogs.com/lyzg/p/5164593.html#_label1
