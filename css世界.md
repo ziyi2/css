@@ -2239,3 +2239,159 @@ margin:auto是为了填充闲置的width而设置的。
 ```
 
 > 此时和设置margin-top:-5000px一样，内联元素在设置了一定高度的负值之后不再往上偏移。
+
+### 功勋卓越的border属性
+
+#### border-style属性
+
+border-style默认值是none，因此单独进行以下设置是没有边框出现的
+
+
+``` html
+<style>
+    div  {
+      height: 200px;
+      width: 200px;
+    }
+    .box1 {
+      border: 1px;
+    }
+    .box2 {
+      border: pink;
+    }
+  </style>
+<body>
+  <div class="box1"></div>
+  <div class="box2"></div>
+</body>
+```
+
+``` html
+<style>
+  div  {
+    height: 200px;
+    width: 200px;
+  }
+  .box1 {
+    border: 1px;
+  }
+  .box2 {
+    border: pink;
+  }
+  .box3 {
+    border: solid; /* 默认出现了3px的边框 */
+  }
+</style>
+<body>
+  <div class="box1"></div>
+  <div class="box2"></div>
+  <div class="box3"></div>
+</body>
+```
+
+> 默认3px是和border-style:double有关，border-style:3px下才能实现双线条分离的视觉效果。
+
+
+实现一个性能最佳的无底部边框
+
+``` html
+<style>
+  div  {
+    height: 200px;
+    width: 200px;
+  }
+  .box {
+    border: solid;
+    border-bottom: 0 none;
+  }
+</style>
+<body>
+  <div class="box"></div>
+</body>
+```
+
+border-style:double的表现规则：双线宽度永远相等，中间间隔+1。因此可以利用这个特性实现“三道杠”大队长效果。
+
+``` html
+<style>
+  .box {
+    width: 100px;
+    height: 20px;
+    border-top: 60px double;
+    border-bottom: 20px solid;
+  }
+</style>
+<body>
+  <div class="box"></div>
+</body>
+```
+
+#### border与透明边框技巧
+
+1. 增加点击区域大小
+
+``` html
+<style>
+  .box {
+    width: 10px;
+    height: 10px;
+    border: 50px solid transparent;
+  }
+</style>
+<body>
+  <div class="box">111</div>
+</body>
+```
+
+2. 三角形图形绘制
+
+``` html
+<style>
+  .box {
+    width: 0;
+    border: 10px solid;
+    border-color: pink transparent transparent;
+  }
+</style>
+<body>
+  <div class="box"></div>
+</body>
+```
+
+#### border与图形构建
+
+``` html
+<style>
+  .box {
+    width: 0;
+    border-width: 20px 10px;
+    border-style: solid;
+    border-color: pink transparent transparent;
+  }
+</style>
+<body>
+  <div class="box"></div>
+</body>
+```
+
+> 窄三角形
+
+
+``` html
+<style>
+  .box {
+    width: 0;
+    border-width: 20px 10px;
+    border-style: solid;
+    border-color: pink pink transparent transparent;
+  }
+</style>
+<body>
+  <div class="box"></div>
+</body>
+```
+
+> 对话框尖角
+
+#### border等高布局技术
+
