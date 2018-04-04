@@ -1918,3 +1918,324 @@ margin可以改变元素的内部尺寸，但和padding施互补态势。
 
 2）正负值相加。
 3) 负负最负值。
+
+#### 深入理解css中的margin:auto
+
+margin:auto是为了填充闲置的width而设置的。
+
+- 如果一侧定宽、一侧auto，则auto为剩余空间大小
+- 如果两侧均是auto，则平分剩余空间。
+
+``` html
+
+<style>
+  .father {
+    width: 300px;
+    height: 300px;
+    border: 1px solid pink;
+  }
+  .son {
+    width: 200px;
+    height: 300px;
+    margin-right: 80px;
+    margin-left: auto; /* */
+    background-color: pink;
+  }
+</style>
+<body>
+  <div class="father">
+    <div class="son"></div>
+  </div>
+</body>
+```
+
+> 此时margin-left自动计算为20px大小。
+
+``` html
+ <style>
+  .father {
+    width: 300px;
+    height: 300px;
+    border: 1px solid pink;
+  }
+  .son {
+    width: 200px;
+    height: 300px;
+    margin-left: auto;
+    background-color: pink;
+  }
+</style>
+<body>
+  <div class="father">
+    <div class="son"></div>
+  </div>
+</body>
+```
+
+> CSS中margin的初始值大小是0，因此以上实例正好实现了右对齐的效果，根据一侧定宽，一侧auto这auto为剩余值的计算方法，margin-left的实际大小为300-200-0,因此正好实现了右对齐的效果。有的时候为了实现元素右对齐，则可以采用margin-left:auto的方法，而非float:right。
+
+- 实现居中效果： margin-left: auto; margin-right: auto;
+- 实现右对齐效果： margin-left: auto;
+- 实现左对齐效果：margin-right: auto;
+
+正好和text-align控制内联元素的左中右对齐类似。
+
+需要注意的margin:auto并不能实现元素的垂直居中对齐，因为在垂直方向height:auto时元素不具有自动填充特性，因此无法垂直居中。
+
+当然通过改变writing-mode改变文档流的方向可以实现垂直居中
+
+``` html
+<style>
+  .father {
+    width: 300px;
+    height: 300px;
+    border: 1px solid pink;
+    writing-mode: vertical-lr; /* 垂直方向自左而右的书写方式。*/
+  }
+  .son {
+    width: 200px;
+    height: 200px;
+    margin: auto;
+    background-color: pink;
+  }
+</style>
+<body>
+  <div class="father">
+    <div class="son">111</div>
+  </div>
+</body>
+```
+
+> 此时垂直居中了,但是水平就不能居中了。
+
+如何实现水平和垂直居中呢，可以使用绝对定位元素的margin:auto居中。
+
+``` html
+<style>
+  .father {
+    width: 300px;
+    height: 300px;
+    border: 1px solid pink;
+    position: absolute;
+  }
+  .son {
+    background-color: pink;
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+  }
+</style>
+<body>
+  <div class="father">
+    <div class="son"></div>
+  </div>
+</body>
+```
+
+> 此时son元素的尺寸表现为“格式化宽度和格式化高度”，和div的“正常流宽度”一样，同属于外部尺寸，也就是尺寸自动填充父级元素的可用尺寸。
+
+``` html
+ <style>
+  .father {
+    width: 300px;
+    height: 300px;
+    border: 1px solid pink;
+    position: absolute;
+  }
+  .son {
+    width: 200px;
+    height: 200px;
+    margin: auto;
+    background-color: pink;
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+  }
+</style>
+<body>
+  <div class="father">
+    <div class="son"></div>
+  </div>
+</body>
+```
+
+> 此时给son一个高度和宽度，原本应该被填充的空间被空余出来了，这多余的空间就是margin:auto计算的空间，此时设置margin:auto就能实现垂直和水平居中了。
+
+
+由于绝对定位元素的格式化高度即使父元素height:auto也支持，因此应用场景非常广泛，唯一不足的就是此居中计算IE8及以上版本浏览器才支持。如果无需考虑支持IE7，此种方法是最直接有效的方法，必top:50%然后margin负一半元素高度的方法好用很多。
+
+需要注意如果son比father大，那margin:auto会被当做0处理，其实就等于没有设置margin值。对于替换元素，可以通过设置display:block;margin:auto;同样生效。
+
+``` html
+<style>
+  .father {
+    width: 300px;
+    height: 300px;
+    border: 1px solid pink;
+    position: absolute;
+  }
+  img {
+    display: block;
+    width: 200px;
+    height: 200px;
+    margin: auto;
+    background-color: pink;
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+  }
+</style>
+<body>
+  <div class="father">
+    <img src="https://timgsa.baidu.com/timg?image&quality=80&size=b9999_10000&sec=1522831997482&di=b790721e923403adfaf7da42b65ed5be&imgtype=0&src=http%3A%2F%2Fimg.25pp.com%2Fuploadfile%2Fapp%2Ficon%2F20160830%2F1472514571151657.jpg" alt="">
+  </div>
+</body>
+```
+
+#### margin无效情形解析
+
+- display计算值为inline的非替换元素的垂直margin无效，对于内联替换元素垂直margin有效，并且没有margin合并的问题。
+
+
+``` html
+<style>
+  .father {
+    width: 300px;
+    height: 300px;
+    background-color: pink;
+  }
+  span {
+    margin-bottom: 20px;
+  }
+  img {
+    width: 200px;
+    height: 200px;
+    background-color: pink;
+    margin-top: 30px;
+  }
+</style>
+<body>
+  <div class="father">
+    <span>span inline</span>
+    <img src="https://timgsa.baidu.com/timg?image&quality=80&size=b9999_10000&sec=1522831997482&di=b790721e923403adfaf7da42b65ed5be&imgtype=0&src=http%3A%2F%2Fimg.25pp.com%2Fuploadfile%2Fapp%2Ficon%2F20160830%2F1472514571151657.jpg" alt="">
+    <div>div block</div>
+  </div>
+</body>
+```
+
+> span作为内联非替换元素设置margin无效。img作为内联替换元素设置垂直margin有效，而且不会和father进行margin合并。
+
+- 表格中tr和td元素或设置display:table-cell或display:table-row的元素的margin无效。
+
+
+``` html
+<style>
+  .father {
+    width: 300px;
+    height: 300px;
+    background-color: pink;
+  }
+  .son {
+    width: 100px;
+    height: 100px;
+    display: table-cell;
+    margin: 20px;
+    background-color: aqua;
+  }
+</style>
+<body>
+  <div class="father">
+    <div class="son"></div>
+    <div class="son"></div>
+  </div>
+</body>
+```
+
+> 此时son元素设置的margin无效。
+
+
+- margin合并时更改margin的值可能无效。
+- 绝对定位元素非定位方位的margin值“无效”。
+
+``` html
+
+<style>
+  .father {
+    width: 300px;
+    height: 300px;
+    background-color: pink;
+    position: relative;
+  }
+  .son {
+    position: absolute;
+    top: 100px;
+    left: 100px;
+    width: 100px;
+    height: 100px;
+    margin-right: 30px;
+    margin-bottom: 200px;
+    background-color: aqua;
+  }
+</style>
+<body>
+  <div class="father">
+    <div class="son"></div>
+    <div class="son"></div>
+  </div>
+</body>
+
+```
+
+> 此时margin-right和margin-bottom设置无效。主要是因为绝对定位元素的渲染是独立的，普通元素和兄弟元素心连心，你动我也动，但是绝对定位元素由于独立渲染无法和兄弟元素插科打诨，因此margin无法影响兄弟元素定位，所以看上去无效。
+
+- 定高容器的子元素的margin-bottom或者定宽定死的子元素的margin-right的定位失效。一个普通元素在默认流下，其定位方向是左侧以及上方，此时只有margin-left和margin-top可以影响元素的定位。
+
+
+- 鞭长莫及导致margin失效。
+
+``` html
+<style>
+  .father>img {
+    float: left;
+    width: 300px;
+  }
+
+  .father>div {
+    overflow: hidden;
+    margin-left: 200px;
+  }
+</style>
+<body>
+  <div class="father">
+    <div>111</div>
+    <img src="https://timgsa.baidu.com/timg?image&quality=80&size=b9999_10000&sec=1522831997482&di=b790721e923403adfaf7da42b65ed5be&imgtype=0&src=http%3A%2F%2Fimg.25pp.com%2Fuploadfile%2Fapp%2Ficon%2F20160830%2F1472514571151657.jpg" alt="">
+  </div>
+</body>
+```
+
+- 内联特性导致margin失效。
+
+``` html
+<style>
+  .father {
+    border: 1px solid pink;
+  }
+  .father>img {
+    height: 100px;
+    margin-top: -10000px;
+  }
+</style>
+<body>
+  <div class="father">
+    <img src="https://timgsa.baidu.com/timg?image&quality=80&size=b9999_10000&sec=1522831997482&di=b790721e923403adfaf7da42b65ed5be&imgtype=0&src=http%3A%2F%2Fimg.25pp.com%2Fuploadfile%2Fapp%2Ficon%2F20160830%2F1472514571151657.jpg" alt="">
+  </div>
+</body>
+```
+
+> 此时和设置margin-top:-5000px一样，内联元素在设置了一定高度的负值之后不再往上偏移。
