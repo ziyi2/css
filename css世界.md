@@ -2395,3 +2395,58 @@ border-style:double的表现规则：双线宽度永远相等，中间间隔+1�
 
 #### border等高布局技术
 
+
+``` html
+<style>
+  .box {
+    border-left: 150px solid #333;
+    background-color: pink;
+    /* overflow: hidden; 不能使用, 溢出隐藏是基于padding-box的，这里的border-box会被隐藏掉 */
+  }
+
+  .box:after {
+    content: '';
+    display: table;
+    clear: both;
+  }
+
+  .box > nav {
+    width: 150px;
+    margin-left: -150px;
+    float: left;
+  }
+
+  .box > nav > h3 {
+    margin: 0;
+  }
+
+  .box > section {
+    overflow: hidden;
+  }
+
+  .nav {
+    line-height: 40px;
+    color: #fff;
+  }
+
+  .module {
+    line-height: 40px;
+  }
+</style>
+<body>
+  <div class="box">
+    <nav>
+      <h3 class="nav">导航</h3>
+      <h3 class="nav">导航2</h3>
+      <h3 class="nav">导航3</h3>
+    </nav>
+    <section>
+      <div class="module">模块1</div>
+    </section>
+  </div>
+</body>
+```
+
+> 最多满足2~3列，理论上采用border-style:double最多可以实现7栏布局。不会出现锚点定位带来的问题。
+
+
