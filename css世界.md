@@ -2533,4 +2533,60 @@ border-style:double的表现规则：双线宽度永远相等，中间间隔+1�
 
 > 最多满足2~3列，理论上采用border-style:double最多可以实现7栏布局。不会出现锚点定位带来的问题。
 
+## 内联元素与流
 
+### 字母x
+
+#### 字母x与基线
+
+在内联模型中，涉及垂直方向的排版或者对齐都离不开最基本的基线(baseline)。line-height行高的定义就是两基线的间距，vertical-align的默认值就是基线。
+
+基线的定义：字母x的下边缘(线)就是基线。
+
+#### 字母x与x-height
+
+x-height就是小写字母x的高度(术语描述就是基线和等分线mean line[也称作中线，midline])之间的距离。
+
+其中vertical-align:middle指的是基线往上1/2 x-height高度。可以近似理解为字母x交叉点那个位置。vertical-align:middle并不是绝对的垂直居中对齐。只是一种近似的效果，因为不同的字体在行内盒子中的位置是不一样的，比如"微软雅黑"就是一个字符下沉比较明显的字体，所在字符的位置比其他字体要偏下一点。所以内联元素的垂直居中是相对于文字而言，而非相对外部的块级容器而言。
+
+#### 字母x与ex
+
+ex是一个相对单位，指的是小写字母x的高度，就是指x-height。ex不适合用来限定元素的尺寸，而是可以作用于不受字体和字号影响的内联元素的垂直居中对齐效果。
+
+#### 内联元素与行高line-height
+
+##### 行高line-height
+
+默认div里写上文字，div的高度由行高line-height决定而不是字体大小决定。
+
+
+``` html
+<style>
+  .line-height-0 {
+    line-height: 0;
+    font-size: 16px;
+    background: #eee;
+    margin-bottom: 40px;
+  }
+
+  .font-size-0 {
+    line-height: 16px;
+    font-size: 0;
+    background: #eee;
+  }
+</style>
+<body>
+  <div class="line-height-0">111</div>
+  <div class="font-size-0">222</div>
+</body>
+```
+
+>  line-height-0的div高度为0，字111存在，而font-size-0的div高度为16px，字222却未显示。显然div高度由行高决定，而非文字。
+
+对于非替换元素的纯内联元素，其可视高度完全由line-height决定(padding、border属性对可视高度完全没有任何影响)。
+
+内联元素的高度由固定高度和不固定高度组成，不固定高度部分就是“行距”。line-height之所以起作用，就是改变“行距”(上下半行距)来实现的。“行距”分散在当前文字的上方和下方(传统印刷的行距是上下两行文字之间预留的间隙)。即使是第一行文字其上方也是会预留间隙的，只是这个间隙是当前"行距"的一半，因此也被称为"半行距"。
+
+行距 = 行高 - em-box (行距 = line-height - font-size)
+
+em-box指的是一个盒子，其高度正好是1em，1em等同于当前一个font-size大小。
