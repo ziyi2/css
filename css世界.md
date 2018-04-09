@@ -2098,6 +2098,90 @@ margin:auto是为了填充闲置的width而设置的。
 </body>
 ```
 
+以上使用margin:auto的方式唯一的不足是必须要设置son的宽高。除此之外可以使用其他方式设置垂直居中
+
+``` html
+<style>
+  .father {
+    width: 400px;
+    height: 400px;
+    border: 1px solid #ccc;
+    display: flex;
+    justify-content: center; /* 在主轴（横轴）方向上的中心对齐 */
+    align-items: center; /* 侧轴（纵轴）方向上中心对齐 */
+  }
+  .son {
+    width: 80%;
+    height: 80%;
+    background: #ccc;
+  }
+</style>
+<body>
+  <div class="father">
+    <div class="son"></div>
+  </div>
+</body>
+```
+
+> 使用flex布局需要注意此方法只兼容IE10。
+
+
+
+``` html
+<style>
+  .father {
+    width: 400px;
+    height: 400px;
+    border: 1px solid #ccc;
+    display: table-cell;
+    text-align: center;
+    vertical-align: middle;
+  }
+  .son {
+    width: 80%;
+    height: 80%;
+    display: inline-block;
+    background: #ccc;
+  }
+</style>
+<body>
+  <div class="father">
+    <div class="son"></div>
+  </div>
+</body>
+```
+
+> 使用table-cell垂直居中布局可以兼容IE8以上。需要注意table-cell不是真正的垂直居中。
+
+``` html
+<style>
+  .father {
+    width: 400px;
+    height: 400px;
+    border: 1px solid #ccc;
+    position: relative;
+  }
+  .son {
+    width: 80%;
+    height: 80%;
+    background: #ccc;
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%,-50%);
+  }
+</style>
+<body>
+  <div class="father">
+    <div class="son"></div>
+  </div>
+</body>
+```
+> 此方法兼容ie9以上。
+
+
+
+
 #### margin无效情形解析
 
 - display计算值为inline的非替换元素的垂直margin无效，对于内联替换元素垂直margin有效，并且没有margin合并的问题。
