@@ -1592,7 +1592,9 @@ margin可以改变元素的内部尺寸，但和padding施互补态势。
 - 伪table-cell布局：不需要考虑table的语义，没有语义且可以像table那样布局，html的层次结构相比直接用table元素也要简单一些，我们这里只用到了3层，直接用table元素的话可能还有tbody这一层，缺点是分栏之间的间隔不能用margin和padding来做，如果用margin，这个属性在display: table-cell的元素上根本不会生效；如果用padding，那像demo里面各栏的背景色就都会连到一块，做不出间隔的效果，如果在layout__col里面再嵌套一层，在这一层设置背景色的话，又会增加html的层次，也不是很好。
 
 
-4. 伪table-cell布局
+4. 实现等高布局的几种方法
+
+- 伪table-cell布局
 
 ``` html
 <style>
@@ -1916,3 +1918,757 @@ margin可以改变元素的内部尺寸，但和padding施互补态势。
 
 2）正负值相加。
 3) 负负最负值。
+
+#### 深入理解css中的margin:auto
+
+margin:auto是为了填充闲置的width而设置的。
+
+- 如果一侧定宽、一侧auto，则auto为剩余空间大小
+- 如果两侧均是auto，则平分剩余空间。
+
+``` html
+
+<style>
+  .father {
+    width: 300px;
+    height: 300px;
+    border: 1px solid pink;
+  }
+  .son {
+    width: 200px;
+    height: 300px;
+    margin-right: 80px;
+    margin-left: auto; /* */
+    background-color: pink;
+  }
+</style>
+<body>
+  <div class="father">
+    <div class="son"></div>
+  </div>
+</body>
+```
+
+> 此时margin-left自动计算为20px大小。
+
+``` html
+ <style>
+  .father {
+    width: 300px;
+    height: 300px;
+    border: 1px solid pink;
+  }
+  .son {
+    width: 200px;
+    height: 300px;
+    margin-left: auto;
+    background-color: pink;
+  }
+</style>
+<body>
+  <div class="father">
+    <div class="son"></div>
+  </div>
+</body>
+```
+
+> CSS中margin的初始值大小是0，因此以上实例正好实现了右对齐的效果，根据一侧定宽，一侧auto这auto为剩余值的计算方法，margin-left的实际大小为300-200-0,因此正好实现了右对齐的效果。有的时候为了实现元素右对齐，则可以采用margin-left:auto的方法，而非float:right。
+
+- 实现居中效果： margin-left: auto; margin-right: auto;
+- 实现右对齐效果： margin-left: auto;
+- 实现左对齐效果：margin-right: auto;
+
+正好和text-align控制内联元素的左中右对齐类似。
+
+需要注意的margin:auto并不能实现元素的垂直居中对齐，因为在垂直方向height:auto时元素不具有自动填充特性，因此无法垂直居中。
+
+当然通过改变writing-mode改变文档流的方向可以实现垂直居中
+
+``` html
+<style>
+  .father {
+    width: 300px;
+    height: 300px;
+    border: 1px solid pink;
+    writing-mode: vertical-lr; /* 垂直方向自左而右的书写方式。*/
+  }
+  .son {
+    width: 200px;
+    height: 200px;
+    margin: auto;
+    background-color: pink;
+  }
+</style>
+<body>
+  <div class="father">
+    <div class="son">111</div>
+  </div>
+</body>
+```
+
+> 此时垂直居中了,但是水平就不能居中了。
+
+如何实现水平和垂直居中呢，可以使用绝对定位元素的margin:auto居中。
+
+``` html
+<style>
+  .father {
+    width: 300px;
+    height: 300px;
+    border: 1px solid pink;
+    position: absolute;
+  }
+  .son {
+    background-color: pink;
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+  }
+</style>
+<body>
+  <div class="father">
+    <div class="son"></div>
+  </div>
+</body>
+```
+
+> 此时son元素的尺寸表现为“格式化宽度和格式化高度”，和div的“正常流宽度”一样，同属于外部尺寸，也就是尺寸自动填充父级元素的可用尺寸。
+
+``` html
+ <style>
+  .father {
+    width: 300px;
+    height: 300px;
+    border: 1px solid pink;
+    position: absolute;
+  }
+  .son {
+    width: 200px;
+    height: 200px;
+    margin: auto;
+    background-color: pink;
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+  }
+</style>
+<body>
+  <div class="father">
+    <div class="son"></div>
+  </div>
+</body>
+```
+
+> 此时给son一个高度和宽度，原本应该被填充的空间被空余出来了，这多余的空间就是margin:auto计算的空间，此时设置margin:auto就能实现垂直和水平居中了。
+
+
+由于绝对定位元素的格式化高度即使父元素height:auto也支持，因此应用场景非常广泛，唯一不足的就是此居中计算IE8及以上版本浏览器才支持。如果无需考虑支持IE7，此种方法是最直接有效的方法，必top:50%然后margin负一半元素高度的方法好用很多。
+
+需要注意如果son比father大，那margin:auto会被当做0处理，其实就等于没有设置margin值。对于替换元素，可以通过设置display:block;margin:auto;同样生效。
+
+``` html
+<style>
+  .father {
+    width: 300px;
+    height: 300px;
+    border: 1px solid pink;
+    position: absolute;
+  }
+  img {
+    display: block;
+    width: 200px;
+    height: 200px;
+    margin: auto;
+    background-color: pink;
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+  }
+</style>
+<body>
+  <div class="father">
+    <img src="https://timgsa.baidu.com/timg?image&quality=80&size=b9999_10000&sec=1522831997482&di=b790721e923403adfaf7da42b65ed5be&imgtype=0&src=http%3A%2F%2Fimg.25pp.com%2Fuploadfile%2Fapp%2Ficon%2F20160830%2F1472514571151657.jpg" alt="">
+  </div>
+</body>
+```
+
+以上使用margin:auto的方式唯一的不足是必须要设置son的宽高。除此之外可以使用其他方式设置垂直居中
+
+``` html
+<style>
+  .father {
+    width: 400px;
+    height: 400px;
+    border: 1px solid #ccc;
+    display: flex;
+    justify-content: center; /* 在主轴（横轴）方向上的中心对齐 */
+    align-items: center; /* 侧轴（纵轴）方向上中心对齐 */
+  }
+  .son {
+    width: 80%;
+    height: 80%;
+    background: #ccc;
+  }
+</style>
+<body>
+  <div class="father">
+    <div class="son"></div>
+  </div>
+</body>
+```
+
+> 使用flex布局需要注意此方法只兼容IE10。
+
+
+
+``` html
+<style>
+  .father {
+    width: 400px;
+    height: 400px;
+    border: 1px solid #ccc;
+    display: table-cell;
+    text-align: center;
+    vertical-align: middle;
+  }
+  .son {
+    width: 80%;
+    height: 80%;
+    display: inline-block;
+    background: #ccc;
+  }
+</style>
+<body>
+  <div class="father">
+    <div class="son"></div>
+  </div>
+</body>
+```
+
+> 使用table-cell垂直居中布局可以兼容IE8以上。需要注意table-cell不是真正的垂直居中。
+
+``` html
+<style>
+  .father {
+    width: 400px;
+    height: 400px;
+    border: 1px solid #ccc;
+    position: relative;
+  }
+  .son {
+    width: 80%;
+    height: 80%;
+    background: #ccc;
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%,-50%);
+  }
+</style>
+<body>
+  <div class="father">
+    <div class="son"></div>
+  </div>
+</body>
+```
+> 此方法兼容ie9以上。
+
+
+
+
+#### margin无效情形解析
+
+- display计算值为inline的非替换元素的垂直margin无效，对于内联替换元素垂直margin有效，并且没有margin合并的问题。
+
+
+``` html
+<style>
+  .father {
+    width: 300px;
+    height: 300px;
+    background-color: pink;
+  }
+  span {
+    margin-bottom: 20px;
+  }
+  img {
+    width: 200px;
+    height: 200px;
+    background-color: pink;
+    margin-top: 30px;
+  }
+</style>
+<body>
+  <div class="father">
+    <span>span inline</span>
+    <img src="https://timgsa.baidu.com/timg?image&quality=80&size=b9999_10000&sec=1522831997482&di=b790721e923403adfaf7da42b65ed5be&imgtype=0&src=http%3A%2F%2Fimg.25pp.com%2Fuploadfile%2Fapp%2Ficon%2F20160830%2F1472514571151657.jpg" alt="">
+    <div>div block</div>
+  </div>
+</body>
+```
+
+> span作为内联非替换元素设置margin无效。img作为内联替换元素设置垂直margin有效，而且不会和father进行margin合并。
+
+- 表格中tr和td元素或设置display:table-cell或display:table-row的元素的margin无效。
+
+
+``` html
+<style>
+  .father {
+    width: 300px;
+    height: 300px;
+    background-color: pink;
+  }
+  .son {
+    width: 100px;
+    height: 100px;
+    display: table-cell;
+    margin: 20px;
+    background-color: aqua;
+  }
+</style>
+<body>
+  <div class="father">
+    <div class="son"></div>
+    <div class="son"></div>
+  </div>
+</body>
+```
+
+> 此时son元素设置的margin无效。
+
+
+- margin合并时更改margin的值可能无效。
+- 绝对定位元素非定位方位的margin值“无效”。
+
+``` html
+
+<style>
+  .father {
+    width: 300px;
+    height: 300px;
+    background-color: pink;
+    position: relative;
+  }
+  .son {
+    position: absolute;
+    top: 100px;
+    left: 100px;
+    width: 100px;
+    height: 100px;
+    margin-right: 30px;
+    margin-bottom: 200px;
+    background-color: aqua;
+  }
+</style>
+<body>
+  <div class="father">
+    <div class="son"></div>
+    <div class="son"></div>
+  </div>
+</body>
+
+```
+
+> 此时margin-right和margin-bottom设置无效。主要是因为绝对定位元素的渲染是独立的，普通元素和兄弟元素心连心，你动我也动，但是绝对定位元素由于独立渲染无法和兄弟元素插科打诨，因此margin无法影响兄弟元素定位，所以看上去无效。
+
+- 定高容器的子元素的margin-bottom或者定宽定死的子元素的margin-right的定位失效。一个普通元素在默认流下，其定位方向是左侧以及上方，此时只有margin-left和margin-top可以影响元素的定位。
+
+
+- 鞭长莫及导致margin失效。
+
+``` html
+<style>
+  .father>img {
+    float: left;
+    width: 300px;
+  }
+
+  .father>div {
+    overflow: hidden;
+    margin-left: 200px;
+  }
+</style>
+<body>
+  <div class="father">
+    <div>111</div>
+    <img src="https://timgsa.baidu.com/timg?image&quality=80&size=b9999_10000&sec=1522831997482&di=b790721e923403adfaf7da42b65ed5be&imgtype=0&src=http%3A%2F%2Fimg.25pp.com%2Fuploadfile%2Fapp%2Ficon%2F20160830%2F1472514571151657.jpg" alt="">
+  </div>
+</body>
+```
+
+- 内联特性导致margin失效。
+
+``` html
+<style>
+  .father {
+    border: 1px solid pink;
+  }
+  .father>img {
+    height: 100px;
+    margin-top: -10000px;
+  }
+</style>
+<body>
+  <div class="father">
+    <img src="https://timgsa.baidu.com/timg?image&quality=80&size=b9999_10000&sec=1522831997482&di=b790721e923403adfaf7da42b65ed5be&imgtype=0&src=http%3A%2F%2Fimg.25pp.com%2Fuploadfile%2Fapp%2Ficon%2F20160830%2F1472514571151657.jpg" alt="">
+  </div>
+</body>
+```
+
+> 此时和设置margin-top:-5000px一样，内联元素在设置了一定高度的负值之后不再往上偏移。
+
+### 功勋卓越的border属性
+
+#### border-style属性
+
+border-style默认值是none，因此单独进行以下设置是没有边框出现的
+
+
+``` html
+<style>
+    div  {
+      height: 200px;
+      width: 200px;
+    }
+    .box1 {
+      border: 1px;
+    }
+    .box2 {
+      border: pink;
+    }
+  </style>
+<body>
+  <div class="box1"></div>
+  <div class="box2"></div>
+</body>
+```
+
+``` html
+<style>
+  div  {
+    height: 200px;
+    width: 200px;
+  }
+  .box1 {
+    border: 1px;
+  }
+  .box2 {
+    border: pink;
+  }
+  .box3 {
+    border: solid; /* 默认出现了3px的边框 */
+  }
+</style>
+<body>
+  <div class="box1"></div>
+  <div class="box2"></div>
+  <div class="box3"></div>
+</body>
+```
+
+> 默认3px是和border-style:double有关，border-style:3px下才能实现双线条分离的视觉效果。
+
+
+实现一个性能最佳的无底部边框
+
+``` html
+<style>
+  div  {
+    height: 200px;
+    width: 200px;
+  }
+  .box {
+    border: solid;
+    border-bottom: 0 none;
+  }
+</style>
+<body>
+  <div class="box"></div>
+</body>
+```
+
+border-style:double的表现规则：双线宽度永远相等，中间间隔+1。因此可以利用这个特性实现“三道杠”大队长效果。
+
+``` html
+<style>
+  .box {
+    width: 100px;
+    height: 20px;
+    border-top: 60px double;
+    border-bottom: 20px solid;
+  }
+</style>
+<body>
+  <div class="box"></div>
+</body>
+```
+
+#### border与透明边框技巧
+
+1. 增加点击区域大小
+
+``` html
+<style>
+  .box {
+    width: 10px;
+    height: 10px;
+    border: 50px solid transparent;
+  }
+</style>
+<body>
+  <div class="box">111</div>
+</body>
+```
+
+2. 三角形图形绘制
+
+``` html
+<style>
+  .box {
+    width: 0;
+    border: 10px solid;
+    border-color: pink transparent transparent;
+  }
+</style>
+<body>
+  <div class="box"></div>
+</body>
+```
+
+#### border与图形构建
+
+``` html
+<style>
+  .box {
+    width: 0;
+    border-width: 20px 10px;
+    border-style: solid;
+    border-color: pink transparent transparent;
+  }
+</style>
+<body>
+  <div class="box"></div>
+</body>
+```
+
+> 窄三角形
+
+
+``` html
+<style>
+  .box {
+    width: 0;
+    border-width: 20px 10px;
+    border-style: solid;
+    border-color: pink pink transparent transparent;
+  }
+</style>
+<body>
+  <div class="box"></div>
+</body>
+```
+
+> 对话框尖角
+
+#### border等高布局技术
+
+
+``` html
+<style>
+  .box {
+    border-left: 150px solid #333;
+    background-color: pink;
+    /* overflow: hidden; 不能使用, 溢出隐藏是基于padding-box的，这里的border-box会被隐藏掉 */
+  }
+
+  .box:after {
+    content: '';
+    display: table;
+    clear: both;
+  }
+
+  .box > nav {
+    width: 150px;
+    margin-left: -150px;
+    float: left;
+  }
+
+  .box > nav > h3 {
+    margin: 0;
+  }
+
+  .box > section {
+    overflow: hidden;
+  }
+
+  .nav {
+    line-height: 40px;
+    color: #fff;
+  }
+
+  .module {
+    line-height: 40px;
+  }
+</style>
+<body>
+  <div class="box">
+    <nav>
+      <h3 class="nav">导航</h3>
+      <h3 class="nav">导航2</h3>
+      <h3 class="nav">导航3</h3>
+    </nav>
+    <section>
+      <div class="module">模块1</div>
+    </section>
+  </div>
+</body>
+```
+
+> 最多满足2~3列，理论上采用border-style:double最多可以实现7栏布局。不会出现锚点定位带来的问题。
+
+## 内联元素与流
+
+### 字母x
+
+#### 字母x与基线
+
+在内联模型中，涉及垂直方向的排版或者对齐都离不开最基本的基线(baseline)。line-height行高的定义就是两基线的间距，vertical-align的默认值就是基线。
+
+基线的定义：字母x的下边缘(线)就是基线。
+
+#### 字母x与x-height
+
+x-height就是小写字母x的高度(术语描述就是基线和等分线mean line[也称作中线，midline])之间的距离。
+
+其中vertical-align:middle指的是基线往上1/2 x-height高度。可以近似理解为字母x交叉点那个位置。vertical-align:middle并不是绝对的垂直居中对齐。只是一种近似的效果，因为不同的字体在行内盒子中的位置是不一样的，比如"微软雅黑"就是一个字符下沉比较明显的字体，所在字符的位置比其他字体要偏下一点。所以内联元素的垂直居中是相对于文字而言，而非相对外部的块级容器而言。
+
+#### 字母x与ex
+
+ex是一个相对单位，指的是小写字母x的高度，就是指x-height。ex不适合用来限定元素的尺寸，而是可以作用于不受字体和字号影响的内联元素的垂直居中对齐效果。
+
+#### 内联元素与行高line-height
+
+##### 行高line-height
+
+默认div里写上文字，div的高度由行高line-height决定而不是字体大小决定。
+
+
+``` html
+<style>
+  .line-height-0 {
+    line-height: 0;
+    font-size: 16px;
+    background: #eee;
+    margin-bottom: 40px;
+  }
+
+  .font-size-0 {
+    line-height: 16px;
+    font-size: 0;
+    background: #eee;
+  }
+</style>
+<body>
+  <div class="line-height-0">111</div>
+  <div class="font-size-0">222</div>
+</body>
+```
+
+>  line-height-0的div高度为0，字111存在，而font-size-0的div高度为16px，字222却未显示。显然div高度由行高决定，而非文字。
+
+对于非替换元素的纯内联元素，其可视高度完全由line-height决定(padding、border属性对可视高度完全没有任何影响)。
+
+内联元素的高度由固定高度和不固定高度组成，不固定高度部分就是“行距”。line-height之所以起作用，就是改变“行距”(上下半行距)来实现的。“行距”分散在当前文字的上方和下方(传统印刷的行距是上下两行文字之间预留的间隙)。即使是第一行文字其上方也是会预留间隙的，只是这个间隙是当前"行距"的一半，因此也被称为"半行距"。
+
+行距 = 行高 - em-box (行距 = line-height - font-size)
+半行距 = 行距 / 2
+
+em-box指的是一个盒子，其高度正好是1em，1em等同于当前一个font-size大小。
+
+内容区域和em-box是不一样的，内容区域通常而言要比em-box高一些，em-box只受font-size影响，而内容区域则不仅受font-size影响，还受到font-family影响。只有当字体是宋体时，内容区域和em-box是等同的。因此使用宋体可以准确看出“半行距”。
+
+``` html
+<style>
+  .simsun {
+    font-family: simsun;
+    font-size: 24px;
+    line-height: 36px;
+    background-color: pink;
+  }
+</style>
+<body>
+  <div class="simsun">simsun</div>
+</body>
+```
+
+> 此时内容区域(鼠标选中高亮的区域)就是em-box的区域。而半行距正好是选中区域外上下多余的额外背景区域。
+
+``` html
+<style>
+  .line-height-2 {
+    line-height: 2;
+  }
+  .line-height-1 {
+    line-height: 1;
+  }
+  .line-height-half {
+    line-height: 0.5;
+  }
+
+  div {
+    margin-bottom: 10px;
+  }
+  p {
+    margin: 0;
+    border: 1px solid pink;
+  }
+</style>
+<body>
+  <div class="line-height-2">
+    <p>文字</p>
+    <p>文字</p>
+  </div>
+  <div class="line-height-1">
+    <p>文字</p>
+    <p>文字</p>
+  </div>
+  <div class="line-height-half">
+    <p>文字</p>
+    <p>文字</p>
+  </div>
+</body>
+```
+
+##### 替换元素和块级元素与行高line-height
+
+line-height不能影响替换元素的高度。
+
+``` html
+<style>
+  .box {
+    line-height: 256px;
+  }
+</style>
+<body>
+  <div class="box">
+    <img height="128" src="https://www.baidu.com/img/bd_logo1.png" alt="">
+  </div>
+</body>
+```
+
+> 此时图片的高度仍然是128px，并不会使256px。但是div的高度确实是256px。
+
+需要注意的是div高度变高，是因为line-height把"幽灵空白节点"的高度变高了，图片为内联元素，会构成一个"行框盒子"，在HTML5文档模式下，每一个"行框盒子"的前面都有一个宽度为0的"幽灵空白节点"，其内联特性表现和普通字符一模一样，所以div的高度会等于line-height设置的属性值256px。
+
+如果是内联替换元素和内联非替换元素排布在一起时，line-height的作用会是什么样？由于同属于内联元素，因此会共同形成一个“行框盒子”，line-height在这个混合元素的“行框盒子”中决定这个行盒的最小高度。对于纯文本元素，line-height直接决定了最终的高度，但是如果有替换元素，则line-height只能决定这个行盒的最小高度，因为替换元素的高度不受line-height影响，而是vertical-align属性也会起作用。
+
+也有这种情况，明明文字设置了line-height为20px，但是文字后面如果有小图标，最后行框盒子的高度却是21px或者22px，这种情况是vertical-align属性在起作用。
+
+对于块级元素line-height本身没有任何作用，通过改变line-height，块级元素的高度跟着变化实际上是通过改变块级元素里面的内联级别元素占据的高度实现。
