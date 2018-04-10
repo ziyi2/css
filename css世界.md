@@ -2588,5 +2588,87 @@ ex是一个相对单位，指的是小写字母x的高度，就是指x-height。
 内联元素的高度由固定高度和不固定高度组成，不固定高度部分就是“行距”。line-height之所以起作用，就是改变“行距”(上下半行距)来实现的。“行距”分散在当前文字的上方和下方(传统印刷的行距是上下两行文字之间预留的间隙)。即使是第一行文字其上方也是会预留间隙的，只是这个间隙是当前"行距"的一半，因此也被称为"半行距"。
 
 行距 = 行高 - em-box (行距 = line-height - font-size)
+半行距 = 行距 / 2
 
 em-box指的是一个盒子，其高度正好是1em，1em等同于当前一个font-size大小。
+
+内容区域和em-box是不一样的，内容区域通常而言要比em-box高一些，em-box只受font-size影响，而内容区域则不仅受font-size影响，还受到font-family影响。只有当字体是宋体时，内容区域和em-box是等同的。因此使用宋体可以准确看出“半行距”。
+
+``` html
+<style>
+  .simsun {
+    font-family: simsun;
+    font-size: 24px;
+    line-height: 36px;
+    background-color: pink;
+  }
+</style>
+<body>
+  <div class="simsun">simsun</div>
+</body>
+```
+
+> 此时内容区域(鼠标选中高亮的区域)就是em-box的区域。而半行距正好是选中区域外上下多余的额外背景区域。
+
+``` html
+<style>
+  .line-height-2 {
+    line-height: 2;
+  }
+  .line-height-1 {
+    line-height: 1;
+  }
+  .line-height-half {
+    line-height: 0.5;
+  }
+
+  div {
+    margin-bottom: 10px;
+  }
+  p {
+    margin: 0;
+    border: 1px solid pink;
+  }
+</style>
+<body>
+  <div class="line-height-2">
+    <p>文字</p>
+    <p>文字</p>
+  </div>
+  <div class="line-height-1">
+    <p>文字</p>
+    <p>文字</p>
+  </div>
+  <div class="line-height-half">
+    <p>文字</p>
+    <p>文字</p>
+  </div>
+</body>
+```
+
+##### 替换元素和块级元素与行高line-height
+
+line-height不能影响替换元素的高度。
+
+``` html
+<style>
+  .box {
+    line-height: 256px;
+  }
+</style>
+<body>
+  <div class="box">
+    <img height="128" src="https://www.baidu.com/img/bd_logo1.png" alt="">
+  </div>
+</body>
+```
+
+> 此时图片的高度仍然是128px，并不会使256px。但是div的高度确实是256px。
+
+需要注意的是div高度变高，是因为line-height把"幽灵空白节点"的高度变高了，图片为内联元素，会构成一个"行框盒子"，在HTML5文档模式下，每一个"行框盒子"的前面都有一个宽度为0的"幽灵空白节点"，其内联特性表现和普通字符一模一样，所以div的高度会等于line-height设置的属性值256px。
+
+如果是内联替换元素和内联非替换元素排布在一起时，line-height的作用会是什么样？由于同属于内联元素，因此会共同形成一个“行框盒子”，line-height在这个混合元素的“行框盒子”中决定这个行盒的最小高度。对于纯文本元素，line-height直接决定了最终的高度，但是如果有替换元素，则line-height只能决定这个行盒的最小高度，因为替换元素的高度不受line-height影响，而是vertical-align属性也会起作用。
+
+也有这种情况，明明文字设置了line-height为20px，但是文字后面如果有小图标，最后行框盒子的高度却是21px或者22px，这种情况是vertical-align属性在起作用。
+
+对于块级元素line-height本身没有任何作用，通过改变line-height，块级元素的高度跟着变化实际上是通过改变块级元素里面的内联级别元素占据的高度实现。
