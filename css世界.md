@@ -1592,9 +1592,7 @@ margin可以改变元素的内部尺寸，但和padding施互补态势。
 - 伪table-cell布局：不需要考虑table的语义，没有语义且可以像table那样布局，html的层次结构相比直接用table元素也要简单一些，我们这里只用到了3层，直接用table元素的话可能还有tbody这一层，缺点是分栏之间的间隔不能用margin和padding来做，如果用margin，这个属性在display: table-cell的元素上根本不会生效；如果用padding，那像demo里面各栏的背景色就都会连到一块，做不出间隔的效果，如果在layout__col里面再嵌套一层，在这一层设置背景色的话，又会增加html的层次，也不是很好。
 
 
-4. 实现等高布局的几种方法
-
-- 伪table-cell布局
+4. 伪table-cell布局
 
 ``` html
 <style>
@@ -1699,4 +1697,222 @@ margin可以改变元素的内部尺寸，但和padding施互补态势。
 
 > 此时实现了两端定宽，中间自适应的布局。
 
-https://www.cnblogs.com/lyzg/p/5164593.html#_label1
+``` html
+<style>
+  .table {
+    display: table;
+    width: 100%;
+  }
+  .table-row {
+    display: table-row;
+  }
+  .table-col {
+    text-align: center;
+    display: table-cell;
+  }
+
+  .left,.right {
+    background-color: #daf1ef;
+    width: 200px; /* 两边固定宽度，中间自适应宽度 */
+  }
+
+  .center {
+    background-color: #4DBCB0;
+  }
+</style>
+<body>
+  <div class="table">
+    <div class="table-col left">
+      <p>1</p>
+      <p>1</p>
+      <p>1</p>
+      <p>1</p>
+      <p>1</p>
+    </div>
+    <div class="table-col center">
+      <p>1</p>
+      <p>1</p>
+      <p>1</p>
+      <p>1</p>
+    </div>
+    <div class="table-col right">
+      <p>1</p>
+      <p>1</p>
+      <p>1</p>
+    </div>
+  </div>
+</body>
+```
+
+> 如果去掉table-row，根据table生成匿名块的特性不会影响布局。而如果把table也去掉，则table-cell不指定宽度就具有包裹性，而不会自适应宽度。
+
+#### margin合并
+
+1. 什么margin合并
+
+块级元素的上外边距和下外边距有时会合并为单个外边距，这样的现象称为margin合并。
+
+- 块级元素：不包括浮动或绝对定位元素。
+- 只发生在垂直方向，当然如果改变writing-mode值(改变文档流方向)，则也可以改变合并方向，准确的说应该是只发生在和当前文档流方向的相垂直的方向上。
+
+2. margin合并的3种场景
+1) 相邻兄弟元素的margin合并
+
+``` html
+<style>
+  p {
+    margin: 10px;
+  }
+</style>
+<body>
+  <p>实际上下margin是10px而不是20px</p>
+  <p>实际上下margin是10px而不是20px</p>
+</body>
+```
+2) 父元素和第一个/最后一个子元素
+
+``` html
+<style>
+  p {
+    margin: 80px 0;
+  }
+  div {
+    margin: 80px 0;
+    background-color: pink;
+  }
+</style>
+<body>
+  <div>
+    <p>margin:80px</p>
+  </div>
+</body>
+```
+
+``` html
+<style>
+  p {
+    margin: 80px 0;
+  }
+
+  div {
+    background-color: pink;
+  }
+</style>
+<body>
+  <div>
+    <p>margin:80px</p>
+  </div>
+</body>
+```
+
+``` html
+<style>
+  div {
+    margin: 80px 0;
+    background-color: pink;
+  }
+</style>
+<body>
+  <div>
+    <p>margin:80px</p>
+  </div>
+</body>
+```
+
+> 以上三种的margin其实都是一样的，查看div的背景色可以发现，p元素的margin值作用到div之外，就好像div本身产生的margin一样，这就是因为产生了margin合并。
+
+
+
+如何阻止父子元素margin合并:
+
+对于margin-top满足以下任意条件即可
+- 父元素设置为块状格式化上下文元素（例如设置overflow:hidden）
+- 父元素设置border-top值
+- 父元素设置padding-top值
+- 父元素和第一个子元素之间添加内联元素进行分隔
+对于margin-bottom满足以下任意条件即可
+- 父元素设置为块状格式化上下文元素
+- 父元素设置border-bottom值
+- 父元素设置padding-bottom值
+- 父元素和最后一个子元素之间添加内联元素进行分隔
+- 父元素设置height、min-height或max-height值
+
+3) 空块级元素的margin合并
+
+``` html
+<style>
+  p {
+    margin: 80px 0;
+  }
+
+  div {
+    overflow: hidden;
+    background-color: pink;
+  }
+</style>
+<body>
+  <div>
+    <p></p>
+  </div>
+</body>
+```
+
+> 此时div的高度是80px而不是160px。因为此时p元素的margin-top和margin-bottom产生了合并，所以只剩下80px了。
+
+
+``` html
+<style>
+  p {
+    margin: 80px 0;
+  }
+
+  div {
+    background-color: pink;
+  }
+</style>
+<body>
+  <div>
+    <p>第一行</p>
+    <div></div>
+    <p>第二行</p>
+  </div>
+</body>
+```
+
+> 两个p之间的距离仍然是80px，因为div容器内部的三个元素产生了三次margin合并，第一次是p元素和相邻的div空元素margin-bottom合并，然后是第二个p元素和div空元素的margin-top合并，由于div是空元素，因此margin-bottom和margin-top又产生了一次合并。当然p元素和父元素div也发生了margin合并。
+
+阻止空元素的margin合并：
+- 设置垂直方向的border
+- 设置垂直方向的padding
+- 里面添加内联元素（空格无效）
+- 设置height或min-height
+
+3. margin合并规则
+1） 正正取大值。
+
+``` html
+<style>
+  p:first-child {
+    margin: 80px 0;
+  }
+
+  p:last-child {
+    margin: 120px 0;
+  }
+
+  div {
+    background-color: pink;
+  }
+</style>
+<body>
+  <div>
+    <p>第一行</p>
+    <p>第二行</p>
+  </div>
+</body>
+```
+
+> 此时两个p元素之间的距离是120px。
+
+2）正负值相加。
+3) 负负最负值。
