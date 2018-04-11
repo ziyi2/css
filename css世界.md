@@ -2886,3 +2886,192 @@ line-height属性值设置为normal会根据字体类型而变化，因此通常
 
 
 此时div的高度是200px。span元素是内联元素，自身有一个“内联盒子”，只要有“内联盒子”，就一定有“行框盒子”，每一行内联元素外面包裹的一层盒子，在每个“行框盒子”前有一个宽度为0的具有该元素的字体和行高属性的看不见的“幽灵空白节点”。当设置box的line-height是200px时，此时拥有行框盒子的box的幽灵空白节点撑开了box的高度，可以使box是200px高，而如果是span设置了line-height为200px，那么由最高的那个“内联盒子”决定了box的高度。
+
+
+### vertical-align
+
+凡是line-height起作用的地方，vertical-align也一定起作用，只是有的时候视觉上感觉不到。
+
+
+``` html
+<style>
+  .box {
+    line-height: 32px;
+  }
+
+  .box > span {
+    font-size: 24px;
+  }
+</style>
+<body>
+  <div class="box">
+    <span>222</span>
+  </div>
+</body>
+```
+> 此时div的高度并不是32px，而是35px。此时是因为vertical-align在起作用。
+
+
+#### vertical-align属性值
+
+- 线类：baseline、top、middle、bottom
+- 文本类：如text-top、text-bottom
+- 上标下标类：如sub、super
+- 数值百分比类：如20px、2em、20%等(相对于基线往上或往下偏移)
+
+``` html
+<style>
+  img {
+    width: 100px;
+  }
+
+  .baseline span {
+    vertical-align: baseline;
+  }
+
+  .number span {
+    vertical-align: 20px;
+  }
+
+  .em span {
+    vertical-align: -1em;
+  }
+
+  .percent span {
+    vertical-align: 100%;
+  }
+
+</style>
+<body>
+  <div class="baseline">
+    <span>字母x</span>
+    <img src="https://timgsa.baidu.com/timg?image&quality=80&size=b9999_10000&sec=1522831997482&di=b790721e923403adfaf7da42b65ed5be&imgtype=0&src=http%3A%2F%2Fimg.25pp.com%2Fuploadfile%2Fapp%2Ficon%2F20160830%2F1472514571151657.jpg" alt="">
+  </div>
+  <div class="number">
+    <span>字母x</span>
+    <img src="https://timgsa.baidu.com/timg?image&quality=80&size=b9999_10000&sec=1522831997482&di=b790721e923403adfaf7da42b65ed5be&imgtype=0&src=http%3A%2F%2Fimg.25pp.com%2Fuploadfile%2Fapp%2Ficon%2F20160830%2F1472514571151657.jpg" alt="">
+  </div>
+  <div class="em">
+    <span>字母x</span>
+    <img src="https://timgsa.baidu.com/timg?image&quality=80&size=b9999_10000&sec=1522831997482&di=b790721e923403adfaf7da42b65ed5be&imgtype=0&src=http%3A%2F%2Fimg.25pp.com%2Fuploadfile%2Fapp%2Ficon%2F20160830%2F1472514571151657.jpg" alt="">
+  </div>
+  <div class="percent">
+    <span>字母x</span>
+    <img src="https://timgsa.baidu.com/timg?image&quality=80&size=b9999_10000&sec=1522831997482&di=b790721e923403adfaf7da42b65ed5be&imgtype=0&src=http%3A%2F%2Fimg.25pp.com%2Fuploadfile%2Fapp%2Ficon%2F20160830%2F1472514571151657.jpg" alt="">
+  </div>
+</body>
+```
+> 负值相对于基线往下偏移，正值往上偏移，事实上vertical-align:base-line等同于vertical-align:0。
+
+vertical-align的属性值middle、text-top等在IE6、IE7下可能渲染规则和其他浏览器不同，但是baseline和相对于baseline的数值百分比类兼容一直很好。需要注意的是vertical-align的百分比值是根据line-height计算的。但是现在的网页基本上line-height都是固定的，因此使用数值比百分比值更方便，而且需要重新计算。
+
+#### vertical-align作用的前提
+
+vertical-align属性只能应用于内联元素以及display值为table-cell的元素，因此vertical-align只能应用于display值为inline、inline-block、inline-table或table-cell的元素[span、strong、em、img、button、input等元素天然支持vertical-align属性，块级元素则不支持]。
+
+
+需要注意浮动和绝对定位会让元素块状化，因此以下组合是不合理的
+
+``` html
+<style>
+.box {
+  float: left;
+  vertical-align: middle;
+}
+.box {
+  position: absolute;
+  vertical-align: middle;
+}
+</style>
+```
+
+
+以下示例中，图片并没有垂直居中，凡是line-height起作用的地方，vertical-align也一定起作用，只是有的时候视觉上感觉不到，以下就是因为box内的幽灵空白节点高度太小，实际上vertical-align在努力渲染。
+
+
+``` html
+<style>
+  .box {
+    height: 128px;
+    background-color: pink;
+  }
+  .box > img {
+    height: 96px;
+    vertical-align: middle;
+  }
+</style>
+<body>
+  <div class="box">
+    <img src="https://timgsa.baidu.com/timg?image&quality=80&size=b9999_10000&sec=1522831997482&di=b790721e923403adfaf7da42b65ed5be&imgtype=0&src=http%3A%2F%2Fimg.25pp.com%2Fuploadfile%2Fapp%2Ficon%2F20160830%2F1472514571151657.jpg" alt="">
+  </div>
+</body>
+```
+
+此时通过设置box的line-height就可以让图片垂直居中了
+
+``` html
+<style>
+  .box {
+    height: 128px;
+    line-height: 128px;
+    background-color: pink;
+  }
+  .box > img {
+    height: 96px;
+    vertical-align: middle;
+  }
+</style>
+<body>
+  <div class="box">
+    <img src="https://timgsa.baidu.com/timg?image&quality=80&size=b9999_10000&sec=1522831997482&di=b790721e923403adfaf7da42b65ed5be&imgtype=0&src=http%3A%2F%2Fimg.25pp.com%2Fuploadfile%2Fapp%2Ficon%2F20160830%2F1472514571151657.jpg" alt="">
+  </div>
+</body>
+```
+
+需要注意的是display:table-cell可以无视行高是因为对于该表现的元素而言，vertical-align起作用的是table-cell元素自身。
+
+
+``` html
+<style>
+  .box {
+    height: 128px;
+    width: 128px;
+    display: table-cell;
+    background-color: pink;
+  }
+  .box > img {
+    height: 96px;
+    vertical-align: middle;
+  }
+</style>
+<body>
+  <div class="box">
+    <img src="https://timgsa.baidu.com/timg?image&quality=80&size=b9999_10000&sec=1522831997482&di=b790721e923403adfaf7da42b65ed5be&imgtype=0&src=http%3A%2F%2Fimg.25pp.com%2Fuploadfile%2Fapp%2Ficon%2F20160830%2F1472514571151657.jpg" alt="">
+  </div>
+</body>
+```
+
+> 此时img元素并没有垂直居中。除非向前面一样设置line-height属性。
+
+``` html
+<style>
+  .box {
+    height: 128px;
+    width: 128px;
+    vertical-align: middle;
+    display: table-cell;
+    background-color: pink;
+  }
+  .box > img {
+    height: 96px;
+  }
+</style>
+<body>
+  <div class="box">
+    <img src="https://timgsa.baidu.com/timg?image&quality=80&size=b9999_10000&sec=1522831997482&di=b790721e923403adfaf7da42b65ed5be&imgtype=0&src=http%3A%2F%2Fimg.25pp.com%2Fuploadfile%2Fapp%2Ficon%2F20160830%2F1472514571151657.jpg" alt="">
+  </div>
+</body>
+```
+> 此时天然垂直居中。因此table-cell元素设置了middle则垂直对齐的就是子元素，其作用的是元素自身而不是子元素，如果子元素是块级元素也一样可以有垂直对齐的表现。
+
+#### vertical-align和line-height的关系
