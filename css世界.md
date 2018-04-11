@@ -2672,3 +2672,217 @@ line-height不能影响替换元素的高度。
 也有这种情况，明明文字设置了line-height为20px，但是文字后面如果有小图标，最后行框盒子的高度却是21px或者22px，这种情况是vertical-align属性在起作用。
 
 对于块级元素line-height本身没有任何作用，通过改变line-height，块级元素的高度跟着变化实际上是通过改变块级元素里面的内联级别元素占据的高度实现。
+
+#### line-height可以让内联元素“垂直居中”
+
+要让单行文字垂直居中，只需要设置line-height即可，而不需要设置line-height = height。行高控制文字垂直居中，不仅适用于单行，多行也可以。需要注意的是垂直居中只是近似的居中，因为文字字形的垂直中线位置普遍要比“行框盒子”的垂直中线位置低，例如微软雅黑字体：
+
+
+``` html
+<style>
+  p {
+    font-size: 100px;
+    line-height: 200px;
+    background-color: black;
+    font-family: 'micriosoft yahei';
+    color: white;
+  }
+</style>
+<body>
+  <div class="box">
+    <p>微软雅黑</p>
+  </div>
+</body>
+```
+
+> 此时字体明显要偏下一点，并不是真正的垂直居中。只是平时使用的font-size较小，因此很难观察到这种情况。
+
+
+多行文本或者替换元素的垂直居中和单行文本不一样，不仅需要设置line-height属性，还需要设置vertical-align属性
+
+
+``` html
+<style>
+  div {
+    line-height: 200px;
+    width: 200px;
+    background-color: black;
+    font-family: 'micriosoft yahei';
+    color: white;
+  }
+  p {
+    display: inline-block;
+    line-height: 20px;
+    margin: 0 20px;
+    vertical-align: middle;
+  }
+</style>
+<body>
+  <div class="box">
+    <p>微软雅黑微软雅黑微软雅黑微软雅黑微软雅黑微软雅黑</p>
+  </div>
+</body>
+```
+
+> 使用display:inline-block既能重置外部的line-height大小，又能保持内联元素特性，从而可以设置vertical-align属性，产生非常关键的"行框盒子"。需要注意的是"行框盒子"会附带一个“幽灵空白节点”(多次强调，内联元素会构成一个"行框盒子"，在HTML5文档模式下，每一个"行框盒子"的前面都有一个宽度为0的"幽灵空白节点"，其内联特性表现和普通字符一模一样，所以div的高度会等于line-height设置的属性值200px。如果把p元素去掉或者不设置p元素的display:inline-block，那么div的高度就一不定是line-height的高度了)，所以在p元素之前的撑起了一个高度为200px宽度为0的内联元素(幽灵空白节点)。又因为内联元素默认是基线对齐的，通过设置vertical-align:middle来调整多行文本的垂直位置，从而实现“垂直居中”效果。而设置了display:inline-block后，p元素内部创建了一个独立的“行框盒子”，这样p设置的line-height就可以生效了，这是多行文本垂直居中的原因。
+
+如果是图片等替换元素
+
+``` html
+<style>
+  div {
+    line-height: 200px;
+    width: 200px;
+    background-color: black;
+    font-family: 'micriosoft yahei';
+    color: white;
+  }
+  img {
+    display: inline-block;
+    vertical-align: middle;
+    height: 100px;
+    margin: 0 50px;
+  }
+</style>
+<body>
+  <div class="box">
+    <img src="https://timgsa.baidu.com/timg?image&quality=80&size=b9999_10000&sec=1522831997482&di=b790721e923403adfaf7da42b65ed5be&imgtype=0&src=http%3A%2F%2Fimg.25pp.com%2Fuploadfile%2Fapp%2Ficon%2F20160830%2F1472514571151657.jpg" alt="">
+  </div>
+</body>
+```
+
+> 实现了垂直居中。需要注意如果要水平居中则还需要对margin做处理。
+
+#### line-height属性值
+
+line-height属性值设置为normal会根据字体类型而变化，因此通常而言需要对line-height值进行重置。line-height可以设置数字、百分比值以及长度值。
+
+
+``` html
+
+<style>
+  div {
+    font-size: 14px;
+    margin-bottom: 50px;
+  }
+  .line-height-1 {
+    line-height: 1.5;
+  }
+  .line-height-2 {
+    line-height: 150%;
+  }
+
+  .line-height-3 {
+    line-height: 1.5em;
+  }
+  h3,p {
+    margin: 0;
+  }
+  h3 {
+    font-size: 32px;
+  }
+  p {
+    font-size: 20px;
+  }
+</style>
+<body>
+  <div class="line-height-1">
+    <h3>line-height:48px</h3>
+    <p>line-height:32px</p>
+  </div>
+  <div class="line-height-2">
+    <h3>line-height:21px</h3>
+    <p>line-height:21px</p>
+  </div>
+  <div class="line-height-3">
+    <h3>line-height:21px</h3>
+    <p>line-height:21px</p>
+  </div>
+</body>
+```
+
+> 明显可以发现后两者都是在body的font-size的基础上进行计算，因为body的font-size:14px; 因此各自的line-height都是21px，也就是百分比和em继承的是计算值。而line-height:1.5的继承不同，p元素和h3元素继承的是属性值1.5而不是计算值，因此各自的line-height都根据各自的font-size进行计算。
+
+通常而言想要类似于。line-height:1.5的效果，可以使用
+
+``` html
+* {
+  line-height: 200%;
+}
+```
+
+> 此时所有的元素都会根据自身的font-size计算line-height。需要注意和body设置line-height不同的是一些表单类的替换元素，具有继承特性的CSS属性例如line-height都有自己的一套，因此body设置的line-height不能被这些替换元素继承，毕竟继承属于最弱的权重，而通配符*的权重大于继承，因此会重置替换元素默认的line-height。
+
+如果考虑到*通配符的性能，可以折中使用 
+
+``` html
+<style>
+  body {
+    line-height: 1.5;
+  }
+
+  input, button {
+    line-height: inherit;
+  }
+</style>
+```
+
+> 需要注意如果是一个重图文内容展示的网页，如博客、论坛、公众号之类的一般使用数值作为单位，如果是偏重布局结构精致的网站，使用长度值或者数值都可以。通常而言大型网站都使用数值作为全局的line-height值。
+
+#### 内联元素line-height的“大值特性”
+
+
+``` html
+<style>
+  .line-height-1 {
+    line-height: 96px;
+  }
+
+  .line-height-1 span {
+    line-height: 20px;
+  }
+
+  .line-height-2 {
+    line-height: 20px;
+  }
+
+  .line-height-2 span {
+    line-height: 96px;
+  }
+</style>
+<body>
+  <div class="line-height-1">
+    <span>111</span>
+  </div>
+  <div class="line-height-2">
+    <span>222</span>
+  </div>
+</body>
+```
+
+> 此时div的高度都是96px。无论内联元素line-height如何设置，最终父级元素的高度都是由数值大的那个line-height决定。
+
+例如
+
+``` html
+<style>
+  .box {
+    line-height: 20px;
+  }
+  span:first-child {
+    line-height: 100px;
+  }
+  span:last-child {
+    line-height: 200px;
+  }
+</style>
+<body>
+  <div class="box">
+    <span>222</span>
+    <span>333</span>
+  </div>
+</body>
+```
+
+
+此时div的高度是200px。span元素是内联元素，自身有一个“内联盒子”，只要有“内联盒子”，就一定有“行框盒子”，每一行内联元素外面包裹的一层盒子，在每个“行框盒子”前有一个宽度为0的具有该元素的字体和行高属性的看不见的“幽灵空白节点”。当设置box的line-height是200px时，此时拥有行框盒子的box的幽灵空白节点撑开了box的高度，可以使box是200px高，而如果是span设置了line-height为200px，那么由最高的那个“内联盒子”决定了box的高度。
