@@ -3075,3 +3075,28 @@ vertical-align属性只能应用于内联元素以及display值为table-cell的�
 > 此时天然垂直居中。因此table-cell元素设置了middle则垂直对齐的就是子元素，其作用的是元素自身而不是子元素，如果子元素是块级元素也一样可以有垂直对齐的表现。
 
 #### vertical-align和line-height的关系
+
+vertical-align的百分比值是相对于line-height计算的，只要出现内联元素，一定会同时出现vertical-align和line-height。之前那个设置了line-height但是高度不是line-height的例子：
+
+``` html
+<style>
+  .box {
+    line-height: 32px;
+  }
+  .box > span {
+    font-size: 24px;
+  }
+</style>
+<body>
+  <div class="box">
+    <span>此时box的高度是35px, span的高度是31px。</span>
+  </div>
+</body>
+```
+> font-size大小设置在span元素上而不是box元素上，导致了box元素的字体大小和span元素有较大出入。而span这个内联元素前面必定有一个“幽灵空白节点”。
+
+
+在span元素前面添加一个字母x，从而可以从视觉上观察出"幽灵空白节点"的作用。
+
+
+
