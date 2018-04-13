@@ -3098,5 +3098,57 @@ vertical-align的百分比值是相对于line-height计算的，只要出现内�
 
 在span元素前面添加一个字母x，从而可以从视觉上观察出"幽灵空白节点"的作用。
 
+``` html
+<style>
+  .box {
+    line-height: 32px;
+  }
+  .box > span {
+    font-size: 24px;
+  }
+</style>
+<body>
+  <div class="box">x<span>文本x</span></div>
+</body>
+```
+此时匿名内联元素x和span内联元素"文本x"的字体大小不一样，由于受到了line-height:32px的影响，这两个盒子的高度都是32px，对字符而言，font-size越大，基线位置相对越往下，因此两个内联盒子的基线相对而言后者低于前者，尽管各自的基线位置相对而言不一样，但是在一个行框盒子内，文字默认都是基线对齐(vertical-align:baseline;)，因此span内联元素低于匿名内联元素的基线需要往上抬，和匿名内联元素保持一致，导致了span内联元素整体往上移，那么此时span内联元素的高度尽管仍然是32px，但是和匿名内联元素一结合，高度肯定大于了32px(两个内联盒子高度都是32px，但是位置一个高一个低，不保持平行，那么总的行框盒子的高度肯定大于32px了)。因此box元素的高度并不是想象中的32px，而是比32px更大。
+
+
+为了解决box元素变大，可以有两种解决方案，一种是设置匿名内联元素的字体大小和span内联元素一致，这样的话两个内联盒子的基线默认对齐，内联盒子不会有上下位移需要保持基线对齐的操作
+
+``` html
+<style>
+  .box {
+    line-height: 32px;
+    font-size: 24px;
+  }
+  .box > span {
+    font-size: 24px;
+  }
+</style>
+<body>
+  <div class="box">x<span>文本x</span></div>
+</body>
+```
+> 此时box的高度就是line-height的高度32px了。
+
+或者改变垂直对齐方式，如顶部对齐，而不是默认的基线对齐
+
+``` html
+<style>
+  .box {
+    line-height: 32px;
+  }
+  .box > span {
+    font-size: 24px;
+    vertical-align: top;
+  }
+</style>
+<body>
+  <div class="box">x<span>文本x</span></div>
+</body>
+```
+
+> 此时box的高度也仍然是32px。
 
 
