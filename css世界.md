@@ -3151,4 +3151,172 @@ vertical-align的百分比值是相对于line-height计算的，只要出现内�
 
 > 此时box的高度也仍然是32px。
 
+大小字号文字的高度偏差问题，在图片中也容易出现，任意一个块级元素若有图片，则块级元素高度基本上都要比图片的高度高。
+
+``` html
+<style>
+  .box {
+    width: 280px;
+    outline: 1px solid pink;
+    text-align: center;
+  }
+  .box > img {
+    height: 96px;
+  }
+</style>
+<body>
+  <div class="box">
+    x<img src="https://timgsa.baidu.com/timg?image&quality=80&size=b9999_10000&sec=1522831997482&di=b790721e923403adfaf7da42b65ed5be&imgtype=0&src=http%3A%2F%2Fimg.25pp.com%2Fuploadfile%2Fapp%2Ficon%2F20160830%2F1472514571151657.jpg" alt="">
+  </div>
+</body>
+```
+
+> box高度101px，图片高度为96px。
+
+
+间隙产生的三大元凶是“幽灵空白节点”、line-height和vertical-align属性。line-height是20px，而font-size是14px，因此字母x(用于模仿幽灵空白节点)往下至少有3px的半行间距，图片作为替换元素其基线是自身的下边缘(也就是x字母的下边缘)，因此图片的下边缘和字母x的下边缘对齐，而字母x因为line-height的缘故，字母x下边缘还有3px的半行间距，导致图片底部在视觉上底部留有空白间隙。
+
+解决方法
+
+- 图片块状化
+
+``` html
+<style>
+  .box {
+    width: 280px;
+    outline: 1px solid pink;
+    text-align: center;
+    font-size: 14px;
+    line-height: 20px;
+  }
+  .box > img {
+    height: 96px;
+    display: block;
+  }
+</style>
+<body>
+  <div class="box">
+    <img src="https://timgsa.baidu.com/timg?image&quality=80&size=b9999_10000&sec=1522831997482&di=b790721e923403adfaf7da42b65ed5be&imgtype=0&src=http%3A%2F%2Fimg.25pp.com%2Fuploadfile%2Fapp%2Ficon%2F20160830%2F1472514571151657.jpg" alt="">
+  </div>
+</body>
+```
+
+- 容器line-height足够小，只要保证字母x的半行间距小到字母x的下边缘位置或以上，例如line-height:0。
+- 容器font-size足够小。
+
+``` html
+<style>
+  .box {
+    width: 280px;
+    outline: 1px solid pink;
+    text-align: center;
+    font-size: 0;
+  }
+  .box > img {
+    height: 96px;
+  }
+</style>
+<body>
+  <div class="box">
+    <img src="https://timgsa.baidu.com/timg?image&quality=80&size=b9999_10000&sec=1522831997482&di=b790721e923403adfaf7da42b65ed5be&imgtype=0&src=http%3A%2F%2Fimg.25pp.com%2Fuploadfile%2Fapp%2Ficon%2F20160830%2F1472514571151657.jpg" alt="">
+  </div>
+</body>
+```
+
+- 设置vertical-align为其他属性值，例如top、middle或者bottom等。
+
+``` html
+<style>
+  .box {
+    width: 280px;
+    outline: 1px solid pink;
+    text-align: center;
+  }
+  .box > img {
+    height: 96px;
+    vertical-align: bottom;
+  }
+</style>
+<body>
+  <div class="box">
+    x<img src="https://timgsa.baidu.com/timg?image&quality=80&size=b9999_10000&sec=1522831997482&di=b790721e923403adfaf7da42b65ed5be&imgtype=0&src=http%3A%2F%2Fimg.25pp.com%2Fuploadfile%2Fapp%2Ficon%2F20160830%2F1472514571151657.jpg" alt="">
+  </div>
+</body>
+```
+
+之前提到的"内联特性导致margin无效"
+
+``` html
+<style>
+  .box {
+    width: 280px;
+    outline: 1px solid pink;
+    text-align: center;
+  }
+  .box > img {
+    height: 96px;
+    margin-top: -800px;
+  }
+</style>
+<body>
+  <div class="box">
+    x<img src="https://timgsa.baidu.com/timg?image&quality=80&size=b9999_10000&sec=1522831997482&di=b790721e923403adfaf7da42b65ed5be&imgtype=0&src=http%3A%2F%2Fimg.25pp.com%2Fuploadfile%2Fapp%2Ficon%2F20160830%2F1472514571151657.jpg" alt="">
+  </div>
+</body>
+```
+
+> 按照理解margin-top值远远超过图片的高度，图片应该跑到容器外面，但是事实上图片仍然有部分在.box元素中，就算margin-top设置成-9999px，图片也不会继续往上移。在css中，非主动触发位移的内联元素是不可能跑到计算容器外面的，导致图片的位置被字母x或“幽灵空白节点”的vertical-align:baseline给限死。
+
+
+``` html
+<style>
+  .box {
+    text-align: justify;
+    background-color: pink;
+  }
+  .fix {
+    display: inline-block;
+    width: 96px;
+    outline: 1px solid brown;
+  }
+
+  img {
+    height: 100px;
+  }
+</style>
+<body>
+  <div class="box">
+    <img src="https://timgsa.baidu.com/timg?image&quality=80&size=b9999_10000&sec=1522831997482&di=b790721e923403adfaf7da42b65ed5be&imgtype=0&src=http%3A%2F%2Fimg.25pp.com%2Fuploadfile%2Fapp%2Ficon%2F20160830%2F1472514571151657.jpg" alt="">
+    <img src="https://timgsa.baidu.com/timg?image&quality=80&size=b9999_10000&sec=1522831997482&di=b790721e923403adfaf7da42b65ed5be&imgtype=0&src=http%3A%2F%2Fimg.25pp.com%2Fuploadfile%2Fapp%2Ficon%2F20160830%2F1472514571151657.jpg" alt="">
+    <img src="https://timgsa.baidu.com/timg?image&quality=80&size=b9999_10000&sec=1522831997482&di=b790721e923403adfaf7da42b65ed5be&imgtype=0&src=http%3A%2F%2Fimg.25pp.com%2Fuploadfile%2Fapp%2Ficon%2F20160830%2F1472514571151657.jpg" alt="">
+    <img src="https://timgsa.baidu.com/timg?image&quality=80&size=b9999_10000&sec=1522831997482&di=b790721e923403adfaf7da42b65ed5be&imgtype=0&src=http%3A%2F%2Fimg.25pp.com%2Fuploadfile%2Fapp%2Ficon%2F20160830%2F1472514571151657.jpg" alt="">
+    <i class="fix"></i>
+    <i class="fix"></i>
+    <i class="fix"></i>
+  </div>
+</body>
+```
+
+> 此时i标签的上面和下面都产生了间隙。
+
+``` html
+<style>
+  .box {
+    text-align: justify;
+    background-color: pink;
+    line-height: 0; /* 解决图片和图片之间的间隙 */
+  }
+  .fix {
+    display: inline-block;
+    width: 96px;
+    outline: 1px solid brown;
+  }
+
+  img {
+    height: 100px;
+  }
+</style>
+```
+
+> 此时i标签和img之间仍然有间隙。
 
