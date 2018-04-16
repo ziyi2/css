@@ -3318,5 +3318,118 @@ vertical-align的百分比值是相对于line-height计算的，只要出现内�
 </style>
 ```
 
-> 此时i标签和img之间仍然有间隙。
+> 此时i标签和img之间仍然有间隙。此时inline-block和baseline在起作用。
 
+#### vertical-align线性类属性值
+
+1. inline-block和baseline
+
+vertical-align:baseline的作用：文本之类的内联元素就是字符x的下边缘，而替换元素则是替换元素的下边缘。但是对于inline-block元素则不一样：
+
+inline-block元素里面没有内联元素，或者overflow不是visible，则该元素的基线就是其margin的底边缘，否则基线就是元素里最后一行内联元素的基线。
+
+
+``` html
+<style>
+  span {
+    display: inline-block;
+    width: 150px;
+    height: 150px;
+    border: 1px solid #eee;
+    background-color: pink;
+  }
+</style>
+<body>
+  <span></span>
+  <span>x</span>
+</body>
+```
+> 第一个span的基线是容器的margin下边缘，第二个span的基线是字母x的下边缘，于是左边span的下边缘和右边span中的x的下边缘对齐。
+
+``` html
+<style>
+  span {
+    display: inline-block;
+    width: 150px;
+    height: 150px;
+    border: 1px solid #eee;
+    background-color: pink;
+    line-height: 0;
+  }
+</style>
+<body>
+  <span></span>
+  <span>x</span>
+</body>
+```
+
+
+此时如果设置line-height为0，字符占据的高度也为0，此时高度的起始位置就变成了字符内容区域的垂直中心位置，于是文字就有一半落在了框的外面，由于文字字符上移了，自然基线位置也往上移动了，于是两个框的垂直落差就更大了。
+
+
+再来看看之前的问题
+
+``` html
+<style>
+  .box {
+    text-align: justify;
+    background-color: pink;
+    line-height: 0;
+  }
+  .fix {
+    display: inline-block;
+    width: 96px;
+    outline: 1px solid brown;
+  }
+
+  img {
+    height: 100px;
+  }
+</style>
+<body>
+  <div class="box">
+    <img src="https://timgsa.baidu.com/timg?image&quality=80&size=b9999_10000&sec=1522831997482&di=b790721e923403adfaf7da42b65ed5be&imgtype=0&src=http%3A%2F%2Fimg.25pp.com%2Fuploadfile%2Fapp%2Ficon%2F20160830%2F1472514571151657.jpg" alt="">
+    <img src="https://timgsa.baidu.com/timg?image&quality=80&size=b9999_10000&sec=1522831997482&di=b790721e923403adfaf7da42b65ed5be&imgtype=0&src=http%3A%2F%2Fimg.25pp.com%2Fuploadfile%2Fapp%2Ficon%2F20160830%2F1472514571151657.jpg" alt="">
+    <img src="https://timgsa.baidu.com/timg?image&quality=80&size=b9999_10000&sec=1522831997482&di=b790721e923403adfaf7da42b65ed5be&imgtype=0&src=http%3A%2F%2Fimg.25pp.com%2Fuploadfile%2Fapp%2Ficon%2F20160830%2F1472514571151657.jpg" alt="">
+    <img src="https://timgsa.baidu.com/timg?image&quality=80&size=b9999_10000&sec=1522831997482&di=b790721e923403adfaf7da42b65ed5be&imgtype=0&src=http%3A%2F%2Fimg.25pp.com%2Fuploadfile%2Fapp%2Ficon%2F20160830%2F1472514571151657.jpg" alt="">
+    <i class="fix">x</i>
+    <i class="fix"></i>
+    <i class="fix"></i>
+  </div>
+</body>
+```
+
+此时给第一个i标签加上字母x之后(模拟不可见的幽灵空白节点)，导致字母x的基线在line-height:0的情况下在上移，导致inline-block元素在有内联元素的情况下基线是内联元素的基线(否则是本身的下边缘)，最终inline-block的元素基线上移，为了使内联元素基线和中线重合在一起，可以改变"幽灵空白节点"的基线位置。
+
+``` html
+<style>
+  .box {
+    text-align: justify;
+    background-color: pink;
+    line-height: 0;
+    font-size: 0;
+  }
+  .fix {
+    display: inline-block;
+    width: 96px;
+    outline: 1px solid brown;
+  }
+
+  img {
+    height: 100px;
+  }
+</style>
+<body>
+  <div class="box">
+    <img src="https://timgsa.baidu.com/timg?image&quality=80&size=b9999_10000&sec=1522831997482&di=b790721e923403adfaf7da42b65ed5be&imgtype=0&src=http%3A%2F%2Fimg.25pp.com%2Fuploadfile%2Fapp%2Ficon%2F20160830%2F1472514571151657.jpg" alt="">
+    <img src="https://timgsa.baidu.com/timg?image&quality=80&size=b9999_10000&sec=1522831997482&di=b790721e923403adfaf7da42b65ed5be&imgtype=0&src=http%3A%2F%2Fimg.25pp.com%2Fuploadfile%2Fapp%2Ficon%2F20160830%2F1472514571151657.jpg" alt="">
+    <img src="https://timgsa.baidu.com/timg?image&quality=80&size=b9999_10000&sec=1522831997482&di=b790721e923403adfaf7da42b65ed5be&imgtype=0&src=http%3A%2F%2Fimg.25pp.com%2Fuploadfile%2Fapp%2Ficon%2F20160830%2F1472514571151657.jpg" alt="">
+    <img src="https://timgsa.baidu.com/timg?image&quality=80&size=b9999_10000&sec=1522831997482&di=b790721e923403adfaf7da42b65ed5be&imgtype=0&src=http%3A%2F%2Fimg.25pp.com%2Fuploadfile%2Fapp%2Ficon%2F20160830%2F1472514571151657.jpg" alt="">
+    <i class="fix">x</i>
+    <i class="fix"></i>
+    <i class="fix"></i>
+  </div>
+</body>
+```
+
+> 由于字体足够小，基线和中线会重合在一起。且没有上下半行距产生空白间隙。使用font-size:0可以使各类对齐效果更彻底。当然同样可以采用vertical-bottom/top(前提仍然是line-height:0)解决产生空隙的问题。
