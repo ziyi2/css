@@ -3433,3 +3433,121 @@ inline-block元素里面没有内联元素，或者overflow不是visible，则�
 ```
 
 > 由于字体足够小，基线和中线会重合在一起。且没有上下半行距产生空白间隙。使用font-size:0可以使各类对齐效果更彻底。当然同样可以采用vertical-bottom/top(前提仍然是line-height:0)解决产生空隙的问题。
+
+2. 了解vertical-align:top/bottom
+
+
+vertical-top:
+- 内联元素：元素底部和当前行框盒子的顶部对齐
+- table-cell元素： 元素底padding边缘和表格行的顶部对齐
+
+3. vertical-align:middle与近似垂直居中
+
+- 内联元素：元素的垂直中心点和行框盒子基线往上1/2 x-height处对齐(通过设置font-size:0可以实现真正的垂直居中，此时根据line-height的半行距上下等分规则，这个点就正好是整个容器的垂直中心点)
+- table-cell元素：单元格填充盒子相对于外面的表格行居中对齐
+
+#### 深入理解vertical-align文本类属性值
+
+- vertical-align:text-top 盒子的顶部和父级内容区的顶部对齐
+- vertical-align:text-bottom 盒子的底部和父级内容区域的底部对齐
+
+
+``` html
+<style>
+  .box {
+    background-color: pink;
+    font-size: 24px;
+  }
+
+  span:first-child {
+    font-size: 16px;
+    vertical-align: bottom;
+  }
+
+  span:nth-child(2) {
+    font-size: 24px;
+    vertical-align: bottom;
+  }
+
+  span:last-child {
+    font-size: 36px;
+    vertical-align: bottom;
+  }
+</style>
+<body>
+  <div class="box">
+    <span>16px</span>
+    <span>24px</span>
+    <span>36px</span>
+  </div>
+</body>
+```
+
+#### 了解vertical-align上标和下标类属性值
+
+- vertical-align:sub 提高盒子的基线到父级合适的上标基线位置
+- vertical-align:super 降低盒子的基线到父级合适的下标基线位置
+
+#### 无处不在的vertical-align
+
+对于内联元素，如果有不好理解的现象肯定是“幽灵空白节点”以及无处不在的vertical-align属性在启作用。
+
+而top/bottom和baseline/middle则完全不同，前者对齐看边缘看行框盒子，而后者对齐则是和字符x相关。
+
+#### 基于vertical-align属性的水平垂直居中弹框
+
+``` html
+<style>
+  .box {
+    position: fixed;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    background-color: rgba(0, 0, 0, .5);
+    text-align: center;
+    font-size: 0;
+    white-space: nowrap;
+    overflow: auto;
+  }
+
+  .box:after {
+    content: '';
+    display: inline-block;
+    height: 100%;
+    vertical-align: middle;
+  }
+
+  .dialog {
+    display: inline-block;
+    vertical-align: middle;
+    text-align: left;
+    font-size: 14px;
+    white-space: normal;
+    background-color: white;
+    padding: 100px;
+    border-radius: 10px;
+  }
+</style>
+<body>
+  <div class="box">
+    <div class="dialog">
+      内容占位内容占位内容占位内容占位内容占位内容占位内容占位内容占位内容占位内容占位内容占位
+    </div>
+  </div>
+</body>
+```
+
+- 节省了很多无谓的定位js代码，不需要浏览器resize事件之类的处理，当弹框内容动态变化时也无须重新定位
+
+- 性能更改、渲染速度更快(浏览器内置的CSS的即时渲染比js处理更好)
+- 可以非常灵活的设置垂直居中的比例，比例.box { height: 90% }
+- 设置overflow:auto可以实现弹框高度超过一屏时可以出现滚动条
+- 这里有两个vertical-align:middle(如果是一个vertical-align，则和line-height有关)，因为弹窗的高度不确定，虽然不能使用某个具体的行高值创建足够的内联元素，于是借助伪元素创建了一个和外部容器一样高的宽度为0的inline-block元素，类似于幽灵空白节点。
+- 设置font-size:0，所以x的中心位置就是box的上边缘，此时高度100%宽度为0的伪元素和这个中心位置对齐，由于设置了vertical-align:middle则使x中心点位置和容器的垂直中心线对齐。
+- 弹框元素.dialog也设置了vertical-align:middle，根据定义，弹框的垂直中心位置和x中心点位置对齐，于是dialog元素就和容器的垂直中心位置对齐了，从而实现垂直居中的效果。
+- 水平居中使用text-align:center。
+
+
+
+
