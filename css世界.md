@@ -3548,6 +3548,267 @@ vertical-top:
 - 弹框元素.dialog也设置了vertical-align:middle，根据定义，弹框的垂直中心位置和x中心点位置对齐，于是dialog元素就和容器的垂直中心位置对齐了，从而实现垂直居中的效果。
 - 水平居中使用text-align:center。
 
+## 流的破坏与保护
+
+### float
+
+#### float本质
+
+浮动的本质是为了实现文字环绕效果。
+浮动没有内联元素的间隙问题和margin合并问题。
+
+float特性：
+- 包裹性
+- 块状化并格式化上下文
+- 破坏文档流
+- 无margin合并问题
+
+1. 包裹
+
+``` html
+<style>
+  .box {
+    width: 200px;
+  }
+  .float {
+    float: left;
+  }
+
+  .float > img {
+    width: 100px;
+  }
+</style>
+<body>
+  <div class="box">
+    <div class="float">
+      <img src="https://timgsa.baidu.com/timg?image&quality=80&size=b9999_10000&sec=1522831997482&di=b790721e923403adfaf7da42b65ed5be&imgtype=0&src=http%3A%2F%2Fimg.25pp.com%2Fuploadfile%2Fapp%2Ficon%2F20160830%2F1472514571151657.jpg" alt="">
+    </div>
+  </div>
+</body>
+```
+> 此时float的宽度就是img的宽度。
+
+2. 自适应性
+
+``` html
+<style>
+  .box {
+    width: 200px;
+  }
+  .float {
+    float: left;
+  }
+
+  .float > img {
+    width: 100px;
+  }
+</style>
+<body>
+  <div class="box">
+    <div class="float">
+      <img src="https://timgsa.baidu.com/timg?image&quality=80&size=b9999_10000&sec=1522831997482&di=b790721e923403adfaf7da42b65ed5be&imgtype=0&src=http%3A%2F%2Fimg.25pp.com%2Fuploadfile%2Fapp%2Ficon%2F20160830%2F1472514571151657.jpg" alt="">
+      我是大傻瓜我是大傻瓜我是大傻瓜我是大傻瓜我是大傻瓜我是大傻瓜我是大傻瓜我是大傻瓜我是大傻瓜我是大傻瓜
+    </div>
+  </div>
+</body>
+```
+
+> 此时float的宽度是200px，适应父元素的宽度。
+
+西方文字的首选最小宽度由特定的连续的英文字符单元决定，会终止于空格、短横线、问号以及其他非英文字符等(如果想要英文字符和中文字符一样，每个字符都用最小宽度单元，可以使用word-break: break-all)。
+
+浮动元素想要最大宽度自适应父元素的宽度，前提是浮动元素的“首选最小宽度”比父元素的宽度要小的前提下。因此如果上面例子把文字全部替换成连续的英文字符串或者数字串则宽度还是可能超过父元素的宽度。
+
+3. 块状化
+
+元素的一旦float的属性值不为none，则display计算值一定是block或者table.
+
+
+``` html
+<style>
+  .box {
+    width: 200px;
+  }
+  .float {
+    float: left;
+  }
+
+  .float > img {
+    width: 100px;
+  }
+</style>
+<body>
+  <div class="box">
+    <span class="float">
+      <img src="https://timgsa.baidu.com/timg?image&quality=80&size=b9999_10000&sec=1522831997482&di=b790721e923403adfaf7da42b65ed5be&imgtype=0&src=http%3A%2F%2Fimg.25pp.com%2Fuploadfile%2Fapp%2Ficon%2F20160830%2F1472514571151657.jpg" alt="">
+      11111111111111111111111111111111111111111111111111111111111111
+    </span>
+  </div>
+</body>
+```
+
+> 此时span元素的display为block，且span元素超过了父元素的大小。需要注意inline-table元素浮动后display:table，其他元素都转化为display:block。
+
+因此以下css组合是不合理的
+
+
+``` html
+<style>
+  .float {
+    float: left; // 有了float之后不需要display:block
+    display: block; 
+    vertical-align: center; // 只对内联元素有效
+    text-align: right; // text-align对浮动元素无效
+  }
+</style>
+```
+
+4. 格式化上下文(BFC)
+
+
+#### float的作用机制
+
+- 父级元素高度塌陷(非BUG), 查看[清除和去除浮动的方法详解](https://ziyi2.github.io/2017/08/02/%E6%B8%85%E9%99%A4%E5%92%8C%E5%8E%BB%E9%99%A4%E6%B5%AE%E5%8A%A8%E7%9A%84%E6%96%B9%E6%B3%95%E8%AF%A6%E8%A7%A3.html#more)
+- 行框盒子的区域限制
+
+1. 父级元素高度塌陷
+
+``` html
+<style>
+  .box {
+    width: 200px;
+  }
+  .float {
+    float: left;
+    display: block;
+    text-align: right;
+  }
+
+  .float > img {
+    width: 100px;
+  }
+</style>
+<body>
+  <div class="box">
+    <span>猫猫猫猫猫猫猫猫猫猫猫猫猫</span>
+    <span class="float">
+      <img src="https://timgsa.baidu.com/timg?image&quality=80&size=b9999_10000&sec=1522831997482&di=b790721e923403adfaf7da42b65ed5be&imgtype=0&src=http%3A%2F%2Fimg.25pp.com%2Fuploadfile%2Fapp%2Ficon%2F20160830%2F1472514571151657.jpg" alt="">
+    </span>
+    <span>猫猫猫猫猫猫猫猫猫猫猫猫猫</span>
+  </div>
+</body>
+```
+
+> 父元素box此时高度塌陷，详情可查看[清除和去除浮动的方法详解](https://ziyi2.github.io/2017/08/02/%E6%B8%85%E9%99%A4%E5%92%8C%E5%8E%BB%E9%99%A4%E6%B5%AE%E5%8A%A8%E7%9A%84%E6%96%B9%E6%B3%95%E8%AF%A6%E8%A7%A3.html#more), 但是文字围绕在图片周围，这就是浮动的作用。
+
+
+2. 行框盒子的区域限制
+
+``` html
+<style>
+  .box {
+    width: 200px;
+  }
+  .float {
+    float: left;
+    display: block;
+    text-align: right;
+  }
+
+  .float > img {
+    width: 100px;
+    opacity: 0;
+  }
+
+  p:first-line {
+    background-color: pink;
+    color: brown;
+  }
+</style>
+<body>
+  <div class="box">
+    <span>猫猫猫猫猫猫猫猫猫猫猫猫猫猫猫猫猫猫猫猫猫猫猫猫猫猫</span>
+    <span class="float">
+      <img src="https://timgsa.baidu.com/timg?image&quality=80&size=b9999_10000&sec=1522831997482&di=b790721e923403adfaf7da42b65ed5be&imgtype=0&src=http%3A%2F%2Fimg.25pp.com%2Fuploadfile%2Fapp%2Ficon%2F20160830%2F1472514571151657.jpg" alt="">
+    </span>
+    <p>猫猫猫猫猫猫猫猫猫猫猫猫猫</p>
+  </div>
+</body>
+```
+
+需要注意p元素和img元素是完全重叠的，例如给环绕的p元素设置一个背景色，同时给img透明
+
+``` html
+<style>
+  .box {
+    width: 200px;
+  }
+  .float {
+    float: left;
+    display: block;
+    text-align: right;
+  }
+
+  .float > img {
+    width: 100px;
+    opacity: 0;
+  }
+
+  p {
+    background-color: pink;
+    color: brown;
+  }
+</style>
+<body>
+  <div class="box">
+    <span>猫猫猫猫猫猫猫猫猫猫猫猫猫猫猫猫猫猫猫猫猫猫猫猫猫猫</span>
+    <span class="float">
+      <img src="https://timgsa.baidu.com/timg?image&quality=80&size=b9999_10000&sec=1522831997482&di=b790721e923403adfaf7da42b65ed5be&imgtype=0&src=http%3A%2F%2Fimg.25pp.com%2Fuploadfile%2Fapp%2Ficon%2F20160830%2F1472514571151657.jpg" alt="">
+    </span>
+    <p>猫猫猫猫猫猫猫猫猫猫猫猫猫</p>
+  </div>
+</body>
+```
+
+> p元素的背景色在图片区域也存在，说明块状盒子和图片是完全重叠的(块状盒子由行框盒子组成，行框盒子由每行内联元素所在的那些内联盒盒子组成)。
+
+需要注意的是p元素整体虽然和图片重叠，但是p元素的每个行框盒子则是被浮动元素限制，没有任何重叠
+
+``` html
+<style>
+  .box {
+    width: 200px;
+  }
+  .float {
+    float: left;
+    display: block;
+    text-align: right;
+  }
+
+  .float > img {
+    width: 100px;
+    opacity: 0;
+  }
+
+  p:first-line {
+    background-color: pink;
+    color: brown;
+  }
+</style>
+<body>
+  <div class="box">
+    <span class="float">
+      <img src="https://timgsa.baidu.com/timg?image&quality=80&size=b9999_10000&sec=1522831997482&di=b790721e923403adfaf7da42b65ed5be&imgtype=0&src=http%3A%2F%2Fimg.25pp.com%2Fuploadfile%2Fapp%2Ficon%2F20160830%2F1472514571151657.jpg" alt="">
+    </span>
+    <p>猫猫猫猫猫猫猫猫猫猫猫猫猫</p>
+  </div>
+</body>
+```
+
+> 此时p元素的第一行的背景色并没有和图片区域重合，就算给p元素一个margin-left负值，p元素所在的这些行框盒子仍然不会改变位置，而是会被左边的浮动元素限制住。
+
+#### float更深入的作用机制
+
 
 
 
