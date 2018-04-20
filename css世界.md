@@ -3809,6 +3809,131 @@ float特性：
 
 #### float更深入的作用机制
 
+``` html
+<style>
+  .box {
+    width: 200px;
+  }
+  a {
+    float: right;
+  }
+</style>
+<body>
+  <div class="box">
+    <h3>房地产销售房地产销售房地产销售 <a href="">更多</a></h3>
+  </div>
+</body>
+```
+> 此时更多显示在下一行的右边，而不是首行的右边。
+
+
+为什么不显示在首行而是显示在最后一行的右边，此时需要了解两个和float相关的术语
+
+- 浮动锚点(float元素所在的流中的一个点，本身并不浮动，像是没有margin、border和padding的空内联元素)
+- 浮动参考(浮动元素对齐参考的实体)
+
+
+float元素的“浮动参考”是“行框盒子”，float元素在当前“行框盒子”(是行框盒子而不是外面的包含块盒子)内定位，所以以上的a标签定位参考的是它所在的行框盒子(h3因为内容区域限制换行后的第二行行框盒子)，如果是相对包含块盒子，那么a标签此时应该在box的最右边，也就是第一行的最右边。
+
+h3因为内容区域限制而导致换行，从而产生了两个行框盒子，而a标签紧跟在h3后面，因此a标签参考定位的行框盒子是第二个行框盒子，那么如果第二个行框盒子正好占满了h3的内容(或者说浮动元素所在的行框盒子已经容纳不下浮动元素)，而第三行却有没有h3的内容，此时a标签如何展示
+
+
+``` html
+<style>
+  .box {
+    width: 200px;
+  }
+  a {
+    float: right;
+  }
+</style>
+<body>
+  <div class="box">
+    <h3>房地产销售房地产销售房地产销售地产销售销 <a href="">更多</a></h3>
+  </div>
+</body>
+```
+
+> 此时a标签在下一行的最右侧显示。
+
+
+之前所说浮动元素是参考当前所在的行框盒子定位，但是这里h3的内容高度只是它所在的文字区域的高度，而a标签则跑到了这个文字区域的下一行，这正是“浮动锚点”在起作用，“浮动锚点”本身是浮动元素所在流中的一个空内联元素，其作用就是产生一个行框盒子(有内联元素必有行框盒子)，于是浮动元素就能参考这个行框盒子进行定位，只是这个行框盒子没有任何内容。
+
+
+#### float与流体布局
+
+实现一侧定宽，一侧宽度自适应的两栏自适应布局
+
+
+``` html
+<style>
+  .box {
+    overflow: hidden; /* 清浮动 */
+  }
+  .box-left {
+    float: left;
+    width: 200px;
+    background-color: peru;
+    height: 200px;
+  }
+  .box-right {
+    margin-left: 210px;
+    background-color: pink;
+    height: 200px;
+  }
+
+</style>
+<body>
+  <div class="box">
+    <div class="box-left"></div>
+    <div class="box-right"></div>
+  </div>
+</body>
+```
+> box-right元素没有设置浮动，也没有设置宽度，因此具有很好的流动性，设置margin-left、border-left或padding-left都可以自动改变content-box的尺寸，从而实现宽度自适应的布局效果。需要注意的是这里不应该设置box-right元素的width从而破坏元素的流动性。
+
+
+上面的例子适用于一侧定宽一侧不固定，如果宽度不固定的流式布局，则可以使用百分比设置box-left的宽度以及box-right的margin值。
+
+如果是多栏流式布局，也同样适用，例如三栏流式布局
+
+
+``` html
+<style>
+  .box {
+    overflow: hidden; /* 清浮动 */
+  }
+  .box-left, .box-right {
+    width: 10%;
+    background-color: peru;
+    height: 200px;
+  }
+  .box-left {
+    float: left;
+  }
+  .box-right {
+    float: right;
+  }
+  .box-center {
+    margin: 0 10%;
+    background-color: pink;
+    height: 200px;
+  }
+
+</style>
+<body>
+  <div class="box">
+    <div class="box-left"></div>
+    <div class="box-right"></div>
+    <div class="box-center"></div>
+  </div>
+</body>
+```
+
+> 此方法需要注意正常流元素需要放在两个浮动元素之前，否则浮动元素会被挤到下一列，因为box-center是正常的块级元素。
+
+
+
 
 
 
