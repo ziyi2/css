@@ -3933,7 +3933,95 @@ h3因为内容区域限制而导致换行，从而产生了两个行框盒子，
 > 此方法需要注意正常流元素需要放在两个浮动元素之前，否则浮动元素会被挤到下一列，因为box-center是正常的块级元素。
 
 
+### clear属性
 
+#### clear属性介绍
+
+clear:元素盒子的边不能和前面的浮动元素相邻。需要注意凡是left和right起作用的地方，都可以使用both。clear属性只能清除前面的浮动元素，不能清除后面的浮动元素
+
+
+``` html
+<style>
+  .box {
+    border: 1px solid pink;
+  }
+
+  .box:before { // 换成after可以
+    display: table;
+    content: '';
+    clear: both;
+  }
+
+  .box-left {
+    float: left;
+  }
+</style>
+<body>
+  <div class="box">
+    <div class="box-left">1111</div>
+  </div>
+</body>
+
+```
+> 此时清除浮动是没有任何效果的，使用after伪元素可以。
+
+
+#### clear属性的限制
+
+clear属性只有块级元素才有效，一般after伪元素默认都是内联水平，所以使用伪元素清除浮动时需要设置display值（table或者block或者list-item都可以）。
+
+
+clear:both的本质是让自己不和float元素在一行显示，因此会有一些副作用特性
+
+- 如果clear:both元素前面的元素就是float元素，则margin-top负值没有任何效果
+- clear:both后面的元素仍旧可能发生文字环绕现象
+
+
+``` html
+<style>
+  .box:after {
+    display: table;
+    content: '';
+    clear: both;
+  }
+
+  .box img {
+    width: 100px;
+    float: left;
+  }
+
+  .box + p {
+    margin: 0;
+    padding: 0;
+    margin-top: -1px;
+  }
+</style>
+<body>
+  <div class="box">
+    <img src="https://timgsa.baidu.com/timg?image&quality=80&size=b9999_10000&sec=1522831997482&di=b790721e923403adfaf7da42b65ed5be&imgtype=0&src=http%3A%2F%2Fimg.25pp.com%2Fuploadfile%2Fapp%2Ficon%2F20160830%2F1472514571151657.jpg" alt="">
+    啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊
+  </div>
+  <p>啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊</p>
+</body>
+```      
+> 此时尽管box清除了浮动，但是p元素仍然会围绕图片。
+
+
+###  BFC结界
+
+BFC全称block formatting context，称为“块级格式化上下文”。相对应的还有IFC(inline formatting context)，称为“内联格式化上下文”。
+
+BFC特性就像一个结界特性，会形成一个封闭空间，内部子元素无论是什么表现形式都不会影响到BFC外部的元素，如果元素具有BFC特性，那么BFC元素之间是不可能发生margin重叠的，因为margin重叠是会影响外面的元素的。BFC元素也可以用来清楚浮动的影响，因为BFC元素不会影响外部的元素，如果不清楚浮动则会导致父元素高度塌陷从而影响后面元素的布局和定位，这显然和BFC元素的子元素不会影响外部元素不符。
+
+什么情况下会触发BFC？
+
+-  html根元素
+- float不为none的元素
+- overflow的值为auto、scroll或hidden的元素
+- display为table-cell、table-caption和inline-block的元素
+- position的值不为realative和static的元素
+
+理论上来说只要元素符合上面任意一个条件，就无须使用clear:both属性去清除浮动的影响。
 
 
 
