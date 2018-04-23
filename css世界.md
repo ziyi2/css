@@ -4023,5 +4023,704 @@ BFC特性就像一个结界特性，会形成一个封闭空间，内部子元�
 
 理论上来说只要元素符合上面任意一个条件，就无须使用clear:both属性去清除浮动的影响。
 
+#### BFC与流体布局
+
+``` html
+<style>
+  .box {
+    width: 200px;
+  }
+  .box:after {
+    display: table;
+    content: '';
+    clear: both;
+  }
+  .box img {
+    width: 100px;
+    float: left;
+  }
+</style>
+<body>
+  <div class="box">
+    <img src="https://timgsa.baidu.com/timg?image&quality=80&size=b9999_10000&sec=1522831997482&di=b790721e923403adfaf7da42b65ed5be&imgtype=0&src=http%3A%2F%2Fimg.25pp.com%2Fuploadfile%2Fapp%2Ficon%2F20160830%2F1472514571151657.jpg" alt="">
+    <p>啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊</p>
+  </div>
+</body>
+```
+
+> 此时文字会环绕图片，而如果超出图片的部分则会显示在图片的下面。
+
+此时如果使P元素具有BFC特性
+
+``` html
+<style>
+  .box {
+    width: 200px;
+  }
+  .box:after {
+    display: table;
+    content: '';
+    clear: both;
+  }
+  .box img {
+    width: 100px;
+    float: left;
+  }
+
+  .box p {
+    overflow: hidden;
+  }
+</style>
+<body>
+  <div class="box">
+    <img src="https://timgsa.baidu.com/timg?image&quality=80&size=b9999_10000&sec=1522831997482&di=b790721e923403adfaf7da42b65ed5be&imgtype=0&src=http%3A%2F%2Fimg.25pp.com%2Fuploadfile%2Fapp%2Ficon%2F20160830%2F1472514571151657.jpg" alt="">
+    <p>啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊</p>
+  </div>
+</body>
+```
+> 此时BFC元素不会受外部元素的影响，也不会影响外部元素，因此这里的p元素不和浮动元素产生交集，会顺着浮动边缘形成自己的封闭上下文。
+
+如果此时希望img和p之间有一个10px大小的间隙
+
+- img { margin-right: 10px }
+- img { border-right: 10px }
+- img { padding-right: 10px }
+- p { border-left: 10px solid transparent }
+- p { padding-left: 10px }
+
+> 注意如果想使用p元素的margin-left，那就需要加上img的宽度大小，这样就变成动态不可控了。
+
+``` html
+<style>
+  .box {
+    width: 200px;
+  }
+  .box:after {
+    display: table;
+    content: '';
+    clear: both;
+  }
+  .box img {
+    width: 100px;
+    float: left;
+    margin-right: 10px;
+  }
+
+  .box p {
+    overflow: hidden;
+  }
+</style>
+<body>
+  <div class="box">
+    <img src="https://timgsa.baidu.com/timg?image&quality=80&size=b9999_10000&sec=1522831997482&di=b790721e923403adfaf7da42b65ed5be&imgtype=0&src=http%3A%2F%2Fimg.25pp.com%2Fuploadfile%2Fapp%2Ficon%2F20160830%2F1472514571151657.jpg" alt="">
+    <p>啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊</p>
+  </div>
+</body>
+```
+
+和基于纯流体特性实现的两栏或多栏自适应布局相比，基于BFC特性的自适应布局有如下有点
+
+- 1. 自适应内容封闭而更健壮，容错性更强，比如在BFC元素的子元素中设置clear属性不会和左侧img元素相互干扰。
+- 2. 自适应元素自动填满浮动以外的区域，无须关心浮动元素宽度。
+
+两栏BFC特性的自适应布局
+
+``` html
+<style>
+  .bfc {
+    overflow: hidden;
+  }
+  .right {
+    float: right;
+  }
+  .left {
+    width: 100px;
+    float: left;
+  }
+</style>
+<body>
+  <div class="bfc">
+    <img class="left" src="https://timgsa.baidu.com/timg?image&quality=80&size=b9999_10000&sec=1522831997482&di=b790721e923403adfaf7da42b65ed5be&imgtype=0&src=http%3A%2F%2Fimg.25pp.com%2Fuploadfile%2Fapp%2Ficon%2F20160830%2F1472514571151657.jpg" alt="">
+    <p class="right">啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊</p>
+  </div>
+</body>
+```
+
+BFC自适应布局的缺陷
+
+- float:left 浮动元素本身BFC化，浮动元素本身具有破坏性和包裹性，失去了元素本身的流体自适应性，因此无法实现自动填满容器的自适应布局。
+
+- position:absolute 脱离文档流。
+- overflow: hidden 不像浮动和绝对定位对于布局的副作用很大，块状元素的流体特性保存完好，附上BFC的独立区域特性，从IE7就开始支持，兼容性也不错。唯一的问题是容器盒子外的元素可能会被隐藏掉，一定程度上限制了使用规模，不过溢出隐藏的交互场景比例不高，可以作用常用BFC布局属性使用。
+- display:inline-block 会让元素包裹性收缩，完全没有block的流体特性，但是在IE6和IE7下block水平元素设置display:inline-block元素还保持block的水平特性
+- display: table-cell IE8及以上版本才支持，也具有收缩性，但是单元格如果宽度值设置的很大，实际宽度也不会超过表格容器的宽度，因此可以给这样表现的元素设置超级大的宽度，例如9999px，让元素像block元素一样保持流体特性的同时保持BFC特性(连续英文字符换行吃力，需要设置word-break)
+- display: table-row 无法自适应于剩余容器控件
+- display: table-caption 一无是处
+
+
+因此总结出来能够用作布局的
+
+- overflow: auto/hidden 适用于IE7及以上版本
+- display: inline-block 适用于IE6和IE7
+- display: table-cell 适用于IE8及以上版本
+
+最终可以采用以下两种方案
+
+``` html
+<style>
+  .bfc {
+    overflow: hidden;
+  }
+</style>
+```
+
+``` html
+<style>
+  .bfc {
+    display: table-cell;
+    width: 9999px;
+    /* 兼容IE7处理 */
+    *display: inline-block;
+    *width: auto;
+  }
+</style>
+```
+
+关于display: table-cell元素内连续英文字符无法换行的问题，可以解决
+
+``` html
+<style>
+.word-break {
+  display: table;
+  width: 100%;
+  table-layout: fixed; /* 此时匿名table-cell元素宽度100% */
+  word-break: break-all;
+}
+</style> 
+```
+> 注意这里设置的display:table其实是table默认会生成一个匿名的table-cell，是这个匿名的table-cell元素形成了BFC。
+
+### 最佳结界overflow
+
+想要彻底清除浮动的影响，最适合的属性不是clear而是overflow，一般使用overflow:hidden。利用BFC的“结界”特性彻底解决浮动对外部或兄弟元素的影响。overflow也不会影响原先的流体特性或宽度表现，需要注意的是overflow的本职工作是对块容器元素的内容溢出进行裁剪。
+
+#### overflow的裁剪界线borde box。
+
+``` html
+<style>
+  .bfc {
+    width: 100px;
+    height: 100px;
+    border: 10px solid pink;
+    padding: 10px;
+    overflow: hidden;
+  }
+
+  .right {
+    float: left;
+  }
+
+  .left {
+    width: 200px;
+    float: left;
+  }
+</style>
+<body>
+  <div class="bfc">
+    <img class="left" src="https://timgsa.baidu.com/timg?image&quality=80&size=b9999_10000&sec=1522831997482&di=b790721e923403adfaf7da42b65ed5be&imgtype=0&src=http%3A%2F%2Fimg.25pp.com%2Fuploadfile%2Fapp%2Ficon%2F20160830%2F1472514571151657.jpg" alt="">
+  </div>
+</body>
+```
+
+> 裁剪的内容是border-box的内边缘，而非padding-box的内边缘，因此padding-right和padding-bottom都被裁剪掉了。
+
+``` html
+<style>
+  .bfc {
+    width: 100px;
+    height: 100px;
+    border: 10px solid pink;
+    padding: 10px;
+    overflow: auto;
+  }
+
+  .right {
+    float: left;
+  }
+
+  .left {
+    width: 200px;
+    float: left;
+  }
+</style>
+<body>
+  <div class="bfc">
+    <img class="left" src="https://timgsa.baidu.com/timg?image&quality=80&size=b9999_10000&sec=1522831997482&di=b790721e923403adfaf7da42b65ed5be&imgtype=0&src=http%3A%2F%2Fimg.25pp.com%2Fuploadfile%2Fapp%2Ficon%2F20160830%2F1472514571151657.jpg" alt="">
+  </div>
+</body>
+```
+
+> 在chrome下，滚动到最低端会有padding-bottom留白(算在滚动尺寸中)，在IE和Firefox会忽略padding-bottom。为了避免出现兼容性问题，在实际开发中应该避免在滚动容器设置padding-bottom值，除了样式表现不统一，还会导致scrollHeight值不一样。
+
+#### overflow-x和overflow-y
+
+除非overflow-x和overflow-y的属性值都是visible，否则visible会当成auto来解析。
+
+``` html
+<style>
+html {
+  overflow-x: hidden;
+  overflow-y: auto; /* 多余 */
+}
+</style>
+```
+
+#### overflow与滚动条
+
+HTML中有两个标签默认是可以产生滚动条的，一个是根元素html，另一个是textarea。
+
+- 在PC端，默认滚动条均来自html，而不是body标签。PC端的窗口滚动高度可以使用document.documentElement.scrollTop获取，在移动端使用document.body.scrollTop获取。
+
+- PC端的滚动条会占用容器的可用宽度或高度。移动端不会，因为屏幕有限，滚动条一般都是悬浮模式，不会占据可用宽度，滚动栏所占据的宽度是精准的17px。
+
+#### 依赖overflow的样式表现
+
+单行文字溢出的...效果实现必须使用如下3个声明
+
+``` html
+<style>
+  .ell {
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    overflow: hidden;
+  }
+</style>
+```
+
+#### overflow与锚点定位
+
+1. 锚点定位行为的触发条件
+
+- URL地址中的锚链与锚点元素对应并有交互行为
+- 可focus的锚点元素处于focus状态
+
+focus锚点定位指的是类链接、按钮、输入框等可以被focus的元素在被focus时发生的页面重定位现象。使用Tab快速定位可focus的元素时，元素如果正好在屏幕之外，浏览器会自动重定位，将这个屏幕之外的元素定位到屏幕之中。如果一个可读写的input元素在屏幕之外，执行document.querySelector('input').focus()输入框就会自动定位到屏幕之中。
+
+> focus锚点定位不依赖于javascript，是浏览器内置的无障碍访问行为。
+
+"URL地址锚链定位"是让元素定位在浏览器窗体的上边缘，而"focus锚点定位"是让元素在浏览器窗体范围内显示即可，不一定在上边缘。
+
+2. 锚点定位作用的本质
+
+锚点定位的本质是改变容器滚动(注意和浏览器滚动是有区别的)的高度或宽度来实现。
+
+``` html
+<style>
+  .box {
+    height: 120px;
+    border: 1px solid pink;
+    overflow: auto;
+  }
+  .box-content {
+    height: 200px;
+    background: palegoldenrod;
+  }
+  .left {
+    width: 200px;
+    float: left;
+  }
+</style>
+<body>
+  <div class="box">
+    <div class="box-content"></div>
+    <h4 id="link">锚链位置</h4>
+  </div>
+  <p><a href="#link">前往</a></p>
+</body>
+```
+> 锚点定位可以发生在普通的容器元素上。
+
+
+``` html
+<style>
+  .box {
+    height: 120px;
+    border: 1px solid pink;
+    overflow: auto;
+  }
+  .content {
+    height: 900px;
+    background: orchid;
+  }
+  .box-content {
+    height: 200px;
+    background: palegoldenrod;
+  }
+  .left {
+    width: 200px;
+    float: left;
+  }
+</style>
+<body>
+  <div class="box">
+    <div class="box-content"></div>
+    <h4 id="link">锚链位置</h4>
+  </div>
+  <div class="content"></div>
+  <p><a href="#link">前往</a></p>
+</body>
+```
+
+> 锚点定位可以由内而外，普通元素和窗体同时可滚动的时候，会由内而外触发所有可能滚动窗体的锚点定位行为。此时box元素先触发锚点定位行为，滚动到底部，然后触发窗体的锚点定位，h4和浏览器窗口的上边缘对齐。
+
+#### BFC与流体布局
+
+``` html
+<style>
+  .box {
+    width: 200px;
+  }
+  .box:after {
+    display: table;
+    content: '';
+    clear: both;
+  }
+  .box img {
+    width: 100px;
+    float: left;
+  }
+</style>
+<body>
+  <div class="box">
+    <img src="https://timgsa.baidu.com/timg?image&quality=80&size=b9999_10000&sec=1522831997482&di=b790721e923403adfaf7da42b65ed5be&imgtype=0&src=http%3A%2F%2Fimg.25pp.com%2Fuploadfile%2Fapp%2Ficon%2F20160830%2F1472514571151657.jpg" alt="">
+    <p>啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊</p>
+  </div>
+</body>
+```
+
+> 此时文字会环绕图片，而如果超出图片的部分则会显示在图片的下面。
+
+此时如果使P元素具有BFC特性
+
+``` html
+<style>
+  .box {
+    width: 200px;
+  }
+  .box:after {
+    display: table;
+    content: '';
+    clear: both;
+  }
+  .box img {
+    width: 100px;
+    float: left;
+  }
+
+  .box p {
+    overflow: hidden;
+  }
+</style>
+<body>
+  <div class="box">
+    <img src="https://timgsa.baidu.com/timg?image&quality=80&size=b9999_10000&sec=1522831997482&di=b790721e923403adfaf7da42b65ed5be&imgtype=0&src=http%3A%2F%2Fimg.25pp.com%2Fuploadfile%2Fapp%2Ficon%2F20160830%2F1472514571151657.jpg" alt="">
+    <p>啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊</p>
+  </div>
+</body>
+```
+> 此时BFC元素不会受外部元素的影响，也不会影响外部元素，因此这里的p元素不和浮动元素产生交集，会顺着浮动边缘形成自己的封闭上下文。
+
+如果此时希望img和p之间有一个10px大小的间隙
+
+- img { margin-right: 10px }
+- img { border-right: 10px }
+- img { padding-right: 10px }
+- p { border-left: 10px solid transparent }
+- p { padding-left: 10px }
+
+> 注意如果想使用p元素的margin-left，那就需要加上img的宽度大小，这样就变成动态不可控了。
+
+``` html
+<style>
+  .box {
+    width: 200px;
+  }
+  .box:after {
+    display: table;
+    content: '';
+    clear: both;
+  }
+  .box img {
+    width: 100px;
+    float: left;
+    margin-right: 10px;
+  }
+
+  .box p {
+    overflow: hidden;
+  }
+</style>
+<body>
+  <div class="box">
+    <img src="https://timgsa.baidu.com/timg?image&quality=80&size=b9999_10000&sec=1522831997482&di=b790721e923403adfaf7da42b65ed5be&imgtype=0&src=http%3A%2F%2Fimg.25pp.com%2Fuploadfile%2Fapp%2Ficon%2F20160830%2F1472514571151657.jpg" alt="">
+    <p>啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊</p>
+  </div>
+</body>
+```
+
+和基于纯流体特性实现的两栏或多栏自适应布局相比，基于BFC特性的自适应布局有如下有点
+
+- 1. 自适应内容封闭而更健壮，容错性更强，比如在BFC元素的子元素中设置clear属性不会和左侧img元素相互干扰。
+- 2. 自适应元素自动填满浮动以外的区域，无须关心浮动元素宽度。
+
+两栏BFC特性的自适应布局
+
+``` html
+<style>
+  .bfc {
+    overflow: hidden;
+  }
+  .right {
+    float: right;
+  }
+  .left {
+    width: 100px;
+    float: left;
+  }
+</style>
+<body>
+  <div class="bfc">
+    <img class="left" src="https://timgsa.baidu.com/timg?image&quality=80&size=b9999_10000&sec=1522831997482&di=b790721e923403adfaf7da42b65ed5be&imgtype=0&src=http%3A%2F%2Fimg.25pp.com%2Fuploadfile%2Fapp%2Ficon%2F20160830%2F1472514571151657.jpg" alt="">
+    <p class="right">啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊</p>
+  </div>
+</body>
+```
+
+BFC自适应布局的缺陷
+
+- float:left 浮动元素本身BFC化，浮动元素本身具有破坏性和包裹性，失去了元素本身的流体自适应性，因此无法实现自动填满容器的自适应布局。
+
+- position:absolute 脱离文档流。
+- overflow: hidden 不像浮动和绝对定位对于布局的副作用很大，块状元素的流体特性保存完好，附上BFC的独立区域特性，从IE7就开始支持，兼容性也不错。唯一的问题是容器盒子外的元素可能会被隐藏掉，一定程度上限制了使用规模，不过溢出隐藏的交互场景比例不高，可以作用常用BFC布局属性使用。
+- display:inline-block 会让元素包裹性收缩，完全没有block的流体特性，但是在IE6和IE7下block水平元素设置display:inline-block元素还保持block的水平特性
+- display: table-cell IE8及以上版本才支持，也具有收缩性，但是单元格如果宽度值设置的很大，实际宽度也不会超过表格容器的宽度，因此可以给这样表现的元素设置超级大的宽度，例如9999px，让元素像block元素一样保持流体特性的同时保持BFC特性(连续英文字符换行吃力，需要设置word-break)
+- display: table-row 无法自适应于剩余容器控件
+- display: table-caption 一无是处
+
+
+因此总结出来能够用作布局的
+
+- overflow: auto/hidden 适用于IE7及以上版本
+- display: inline-block 适用于IE6和IE7
+- display: table-cell 适用于IE8及以上版本
+
+最终可以采用以下两种方案
+
+``` html
+<style>
+  .bfc {
+    overflow: hidden;
+  }
+</style>
+```
+
+``` html
+<style>
+  .bfc {
+    display: table-cell;
+    width: 9999px;
+    /* 兼容IE7处理 */
+    *display: inline-block;
+    *width: auto;
+  }
+</style>
+```
+
+关于display: table-cell元素内连续英文字符无法换行的问题，可以解决
+
+``` html
+<style>
+.word-break {
+  display: table;
+  width: 100%;
+  table-layout: fixed; /* 此时匿名table-cell元素宽度100% */
+  word-break: break-all;
+}
+</style> 
+```
+> 注意这里设置的display:table其实是table默认会生成一个匿名的table-cell，是这个匿名的table-cell元素形成了BFC。
+
+### 最佳结界overflow
+
+想要彻底清除浮动的影响，最适合的属性不是clear而是overflow，一般使用overflow:hidden。利用BFC的“结界”特性彻底解决浮动对外部或兄弟元素的影响。overflow也不会影响原先的流体特性或宽度表现，需要注意的是overflow的本职工作是对块容器元素的内容溢出进行裁剪。
+
+#### overflow的裁剪界线borde box。
+
+``` html
+<style>
+  .bfc {
+    width: 100px;
+    height: 100px;
+    border: 10px solid pink;
+    padding: 10px;
+    overflow: hidden;
+  }
+
+  .right {
+    float: left;
+  }
+
+  .left {
+    width: 200px;
+    float: left;
+  }
+</style>
+<body>
+  <div class="bfc">
+    <img class="left" src="https://timgsa.baidu.com/timg?image&quality=80&size=b9999_10000&sec=1522831997482&di=b790721e923403adfaf7da42b65ed5be&imgtype=0&src=http%3A%2F%2Fimg.25pp.com%2Fuploadfile%2Fapp%2Ficon%2F20160830%2F1472514571151657.jpg" alt="">
+  </div>
+</body>
+```
+
+> 裁剪的内容是border-box的内边缘，而非padding-box的内边缘，因此padding-right和padding-bottom都被裁剪掉了。
+
+``` html
+<style>
+  .bfc {
+    width: 100px;
+    height: 100px;
+    border: 10px solid pink;
+    padding: 10px;
+    overflow: auto;
+  }
+
+  .right {
+    float: left;
+  }
+
+  .left {
+    width: 200px;
+    float: left;
+  }
+</style>
+<body>
+  <div class="bfc">
+    <img class="left" src="https://timgsa.baidu.com/timg?image&quality=80&size=b9999_10000&sec=1522831997482&di=b790721e923403adfaf7da42b65ed5be&imgtype=0&src=http%3A%2F%2Fimg.25pp.com%2Fuploadfile%2Fapp%2Ficon%2F20160830%2F1472514571151657.jpg" alt="">
+  </div>
+</body>
+```
+
+> 在chrome下，滚动到最低端会有padding-bottom留白(算在滚动尺寸中)，在IE和Firefox会忽略padding-bottom。为了避免出现兼容性问题，在实际开发中应该避免在滚动容器设置padding-bottom值，除了样式表现不统一，还会导致scrollHeight值不一样。
+
+#### overflow-x和overflow-y
+
+除非overflow-x和overflow-y的属性值都是visible，否则visible会当成auto来解析。
+
+``` html
+<style>
+html {
+  overflow-x: hidden;
+  overflow-y: auto; /* 多余 */
+}
+</style>
+```
+
+#### overflow与滚动条
+
+HTML中有两个标签默认是可以产生滚动条的，一个是根元素html，另一个是textarea。
+
+- 在PC端，默认滚动条均来自html，而不是body标签。PC端的窗口滚动高度可以使用document.documentElement.scrollTop获取，在移动端使用document.body.scrollTop获取。
+
+- PC端的滚动条会占用容器的可用宽度或高度。移动端不会，因为屏幕有限，滚动条一般都是悬浮模式，不会占据可用宽度，滚动栏所占据的宽度是精准的17px。
+
+#### 依赖overflow的样式表现
+
+单行文字溢出的...效果实现必须使用如下3个声明
+
+``` html
+<style>
+  .ell {
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    overflow: hidden;
+  }
+</style>
+```
+
+#### overflow与锚点定位
+
+1. 锚点定位行为的触发条件
+
+- URL地址中的锚链与锚点元素对应并有交互行为
+- 可focus的锚点元素处于focus状态
+
+focus锚点定位指的是类链接、按钮、输入框等可以被focus的元素在被focus时发生的页面重定位现象。使用Tab快速定位可focus的元素时，元素如果正好在屏幕之外，浏览器会自动重定位，将这个屏幕之外的元素定位到屏幕之中。如果一个可读写的input元素在屏幕之外，执行document.querySelector('input').focus()输入框就会自动定位到屏幕之中。
+
+> focus锚点定位不依赖于javascript，是浏览器内置的无障碍访问行为。
+
+"URL地址锚链定位"是让元素定位在浏览器窗体的上边缘，而"focus锚点定位"是让元素在浏览器窗体范围内显示即可，不一定在上边缘。
+
+2. 锚点定位作用的本质
+
+锚点定位的本质是改变容器滚动(注意和浏览器滚动是有区别的)的高度或宽度来实现。
+
+``` html
+<style>
+  .box {
+    height: 120px;
+    border: 1px solid pink;
+    overflow: auto;
+  }
+  .box-content {
+    height: 200px;
+    background: palegoldenrod;
+  }
+  .left {
+    width: 200px;
+    float: left;
+  }
+</style>
+<body>
+  <div class="box">
+    <div class="box-content"></div>
+    <h4 id="link">锚链位置</h4>
+  </div>
+  <p><a href="#link">前往</a></p>
+</body>
+```
+> 锚点定位可以发生在普通的容器元素上。
+
+
+``` html
+<style>
+  .box {
+    height: 120px;
+    border: 1px solid pink;
+    overflow: auto;
+  }
+  .content {
+    height: 900px;
+    background: orchid;
+  }
+  .box-content {
+    height: 200px;
+    background: palegoldenrod;
+  }
+  .left {
+    width: 200px;
+    float: left;
+  }
+</style>
+<body>
+  <div class="box">
+    <div class="box-content"></div>
+    <h4 id="link">锚链位置</h4>
+  </div>
+  <div class="content"></div>
+  <p><a href="#link">前往</a></p>
+</body>
+```
+
+> 锚点定位可以由内而外，普通元素和窗体同时可滚动的时候，会由内而外触发所有可能滚动窗体的锚点定位行为。此时box元素先触发锚点定位行为，滚动到底部，然后触发窗体的锚点定位，h4和浏览器窗口的上边缘对齐。
 
 
