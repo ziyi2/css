@@ -4723,4 +4723,36 @@ focus锚点定位指的是类链接、按钮、输入框等可以被focus的元�
 
 > 锚点定位可以由内而外，普通元素和窗体同时可滚动的时候，会由内而外触发所有可能滚动窗体的锚点定位行为。此时box元素先触发锚点定位行为，滚动到底部，然后触发窗体的锚点定位，h4和浏览器窗口的上边缘对齐。
 
+需要注意的是设置了overflow:hidden的元素也是可以滚动的，hidden与auto和scroll的差别仅在于有没有滚动条，在设置了overflow:hidden内容高度溢出之后滚动依然存在，仅仅是滚动条不存在(鼠标滚动时不会触发滚动效果)。
 
+需要注意使用锚点定位时，滚动依然会发生
+
+``` html
+<style>
+  .box {
+    height: 120px;
+    border: 1px solid pink;
+    overflow: hidden;
+  }
+  .content {
+    height: 900px;
+    background: orchid;
+  }
+  .box-content {
+    height: 200px;
+    background: palegoldenrod;
+  }
+  .left {
+    width: 200px;
+    float: left;
+  }
+</style>
+<body>
+  <div class="box">
+    <div class="box-content"></div>
+    <h4 id="link">锚链位置</h4>
+  </div>
+  <div class="content"></div>
+  <p><a href="#link">前往</a></p>
+</body>
+```
