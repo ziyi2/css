@@ -4756,3 +4756,89 @@ focus锚点定位指的是类链接、按钮、输入框等可以被focus的元�
   <p><a href="#link">前往</a></p>
 </body>
 ```
+
+例如使用overflow属性实现无JavaScript交互的选项卡切换效果
+
+``` html
+<style>
+  .box {
+    height: 120px;
+    border: 1px solid pink;
+    overflow: hidden;
+  }
+  
+  .list {
+    height: 100%;
+    background: pink;
+  }
+</style>
+<body>
+  <br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
+  <div class="box">
+    <div class="list" id="one">1</div>
+    <div class="list" id="two">2</div>
+    <div class="list" id="three">3</div>
+  </div>
+  <div class="link">
+    <a href="#one">1</a>
+    <a href="#two">2</a>
+    <a href="#three">3</a>
+  </div>
+  <br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
+</body>
+```
+
+> 这个设置有很多不足之处，第一个是box元素的容器必须定高，第二个是如果页面html是可以滚动的，那么点击选项卡后页面也会发生跳动，之前已经说过锚点定位是可以由内而外的。
+
+
+
+需要注意的是“focus锚点定位”则没有这个问题，只要定位元素在浏览器窗体内，则不会触发窗体的滚动。
+
+``` html
+<style>
+  .box {
+    height: 120px;
+    border: 1px solid pink;
+    overflow: hidden;
+  }
+  
+  .list {
+    height: 100%;
+    background: pink;
+    position: relative;
+  }
+
+  .list > input {
+    position: absolute;
+    top: 0;
+    height: 100%;
+    width: 1px;
+    border: 0;
+    padding: 0;
+    margin: 0;
+    clip: rect(0 0 0 0);
+  }
+</style>
+<body>
+  <br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
+  <div class="box">
+    <div class="list"><input id="one">1</div>
+    <div class="list"><input id="two">2</div>
+    <div class="list"><input id="three">3</div>
+  </div>
+  <div class="link">
+    <label for="one">1</label>
+    <label for="two">2</label>
+    <label for="three">3</label>
+  </div>
+  <br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
+</body>
+```
+
+> 在每个列表中塞入一个看不见的input输入框，通过label的for与input的id关联，点击label会触发输入框的focus行为，触发锚点定位，实现选项卡切换。还有有一个优点是可以使用Tab键切换。需要注意如果列表部分区域在浏览器外面(例如滚动条往下滚使得列表部分显示在浏览器顶端外部)时依然会产生跳动的问题，此时需要javascript做一定的处理。
+
+
+需要注意之前使用margin-bottom负值加上padding-bottom正直以及父元素的overflow:hidden配合实现等高布局，如果使用dom.scrollIntoView()或者触发窗体视区范围内的内部元素的锚点定位行为，布局就会飞掉，此时容器的scrollHeight(视区高度+可滚动高度)要远远大于clientHeight(视区高度),而锚点定位的本质就是改变滚动高度，因此容器的滚动高度不是0，发生了类似之前选项卡的效果，产生布局问题。
+
+
+
