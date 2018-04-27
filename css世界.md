@@ -4840,5 +4840,458 @@ focus锚点定位指的是类链接、按钮、输入框等可以被focus的元�
 
 需要注意之前使用margin-bottom负值加上padding-bottom正直以及父元素的overflow:hidden配合实现等高布局，如果使用dom.scrollIntoView()或者触发窗体视区范围内的内部元素的锚点定位行为，布局就会飞掉，此时容器的scrollHeight(视区高度+可滚动高度)要远远大于clientHeight(视区高度),而锚点定位的本质就是改变滚动高度，因此容器的滚动高度不是0，发生了类似之前选项卡的效果，产生布局问题。
 
+### position:absolute
+
+position:absolute和float:left/right是兄弟关系，都兼具“块状化”、“破坏性”、“包裹性”等特性。absoulte比float能力更霸道，因此absolute和float同时存在时，float属性是无任何效果的。
 
 
+``` html
+<style>
+.box {
+  position: absolute;
+  float: left; // 无效
+}
+</style>
+```
+
+
+1. 块状化
+position一旦置为absolute或fixed,其display值就是block或table。
+
+``` html
+<style>
+  span {
+    position: absolute;
+  }
+</style>
+<body>
+  <span>1111</span>
+</body>
+```
+
+> 此时span元素显示为display:block。
+
+
+2. 破坏性
+
+和float类似，absolute破坏正常的流来实现自己的特性表现，但本身还是受到普通的流体元素布局、位置甚至是一些内联相关的CSS属性影响（例如text-align）。
+
+3. 格式化
+
+和float类似，能形成“块状格式化上下文”BFC。
+
+4. 包裹性
+
+display:inline-block具有“包裹性”，如果为了使absolute元素具有包裹性，那么以下设置没必要
+
+``` html
+<style>
+  span {
+    position: absolute;
+    display: inline-block;
+  }
+</style>
+```
+
+5. 自适应性
+
+和float或其他“包裹性”声明的自适应性相比，absolute的自适应性最大宽度往往不是由父元素决定，是由“包含块”的差异决定。
+
+#### absolute的包含块
+
+普通元素的百分比宽度是相对于父元素的content-box宽度计算的，绝对定位的宽度是相对于第一个position不为static的祖先元素计算的。
+
+- 根元素html被称为“初始包含块”，其尺寸等同于浏览器可视窗口的大小。
+- position是relative或static的元素，“包含块”是最近的块容器祖先盒的content-box边界形成。
+- position是fixed的元素，则“包含块”是“初始包含块”。
+- position是absolute的元素，则“包含块”由最近的position不为static的祖先元素建立。
+
+如果该祖先元素是inline元素： 
+(1). 假设给内联元素的前后各生成一个宽度为0的内联盒子，则这两个内联盒子的padding box外面的包围盒就是内联元素的“包含块”。
+(2). 如果该内联元素被跨行分隔了，那么“包含块”未定义。
+否则该祖先元素不是inline元素，“包含块”由该祖先元素的padding box边界形成。
+如果没有符合的祖先元素，则“包含块”是“初始包含块”。
+
+absolute绝对定位元素的“包含块”有3个明显差异：
+1. 内联元素也可以作为“包含块”所在的元素
+2. “包含块”所在的元素不是父块级元素，而是最近的position不为static的祖先元素或根元素
+3. 边界是padding box而不是content box。
+
+
+ ``` html
+<style>
+  span {
+    position: absolute;
+  }
+  big {
+    font-size: 30px;
+  }
+</style>
+<body>
+  <span>我是很大的<big>111</big>哦</span>
+</body>
+ ```
+
+> 此时span元素的包含块范围与big元素毫无关系，内联元素的包含块是由生成的前后内联盒子决定的，与里面的内联盒子细节没有任何关系(span元素前后的内联盒子相关，而与span元素内部的内联盒子不相关)。
+
+
+``` html
+<style>
+  .box {
+    position: absolute;
+  }
+
+  .container {
+    width: 200px;
+    border: 1px solid pink;
+    position: relative;
+  }
+</style>
+<body>
+  <div class="container">
+    <div class="box">
+      1111
+    </div>
+  </div>
+</body>
+```
+>此时box的宽度就是文字的宽度，表现为包裹性。
+
+``` html
+<style>
+  .box {
+    position: absolute;
+  }
+
+  .container {
+    width: 200px;
+    border: 1px solid pink;
+    position: relative;
+  }
+</style>
+<body>
+  <div class="container">
+    <div class="box">
+      111111111111111111111111111111111111111111111111111111111111111111111111
+    </div>
+    <div class="box">
+      我是文字我是文字我是文字我是文字我是文字我是文字我是文字我是文字我是文字我是文字我是文字我是文字
+    </div>
+  </div>
+</body>
+```
+
+> 此时第一个box不换行，第二个box宽度是container的宽度，是因为被container包含块限制了宽度。因此决定定位的默认最大宽度是“包含块”的宽度，表现为自适应性。需要注意container高度塌陷是因为absolute元素脱离了正常流。此时如果给box元素设置一个max-width:100%是多余的，因为absolute元素默认的最大宽度就是包含块的宽度。需要注意的是有的时候纯表现为包裹性会有换行效果，如果要不换行可以设置white-space:nowrap。
+
+最后需要注意的是计算和定位是相对于祖先定位元素的padding box，这和overflow隐藏的是padding box边界类似，是使用场景决定的。
+
+
+``` html
+<style>
+  .container {
+    width: 200px;
+    height: 200px;
+    padding: 50px;
+    background-color: pink;
+    position: relative;
+  }
+  .box {
+    position: absolute;
+    top: 0;
+    right: 0;
+  }
+</style>
+<body>
+  <div class="container">
+    我是内容
+    <div class="box">
+      小图标
+    </div>
+  </div>
+</body>
+```
+> 此时box在container的padding区域内。而不是定位在container的content box区域的右上角。
+
+如果想要定位在内容区域的右上角，此时不应该使用padding，因为使用padding需要对top和left设置padding值
+
+``` html
+<style>
+  .container {
+    width: 200px;
+    height: 200px;
+    padding: 50px;
+    background-color: pink;
+    position: relative;
+  }
+  .box {
+    position: absolute;
+    top: 50px;
+    right: 50px;
+  }
+</style>
+<body>
+  <div class="container">
+    我是内容
+    <div class="box">
+      小图标
+    </div>
+  </div>
+</body>
+```
+
+> 此时如果padding值变化了，那么top和right值也需要跟着变化，从而使得维护性下降。
+
+此时可以使用border属性模拟padding从而达到同样的效果
+
+``` html
+<style>
+  .container {
+    width: 200px;
+    height: 200px;
+    border: 50px solid transparent;
+    background-color: pink;
+    position: relative;
+  }
+  .box {
+    position: absolute;
+    top: 0;
+    right: 0;
+  }
+</style>
+<body>
+  <div class="container">
+    我是内容
+    <div class="box">
+      小图标
+    </div>
+  </div>
+</body>
+```
+
+### position:absolute
+
+position:absolute和float:left/right是兄弟关系，都兼具“块状化”、“破坏性”、“包裹性”等特性。absoulte比float能力更霸道，因此absolute和float同时存在时，float属性是无任何效果的。
+
+
+``` html
+<style>
+.box {
+  position: absolute;
+  float: left; // 无效
+}
+</style>
+```
+
+
+1. 块状化
+position一旦置为absolute或fixed,其display值就是block或table。
+
+``` html
+<style>
+  span {
+    position: absolute;
+  }
+</style>
+<body>
+  <span>1111</span>
+</body>
+```
+
+> 此时span元素显示为display:block。
+
+
+2. 破坏性
+
+和float类似，absolute破坏正常的流来实现自己的特性表现，但本身还是受到普通的流体元素布局、位置甚至是一些内联相关的CSS属性影响（例如text-align）。
+
+3. 格式化
+
+和float类似，能形成“块状格式化上下文”BFC。
+
+4. 包裹性
+
+display:inline-block具有“包裹性”，如果为了使absolute元素具有包裹性，那么以下设置没必要
+
+``` html
+<style>
+  span {
+    position: absolute;
+    display: inline-block;
+  }
+</style>
+```
+
+5. 自适应性
+
+和float或其他“包裹性”声明的自适应性相比，absolute的自适应性最大宽度往往不是由父元素决定，是由“包含块”的差异决定。
+
+#### absolute的包含块
+
+普通元素的百分比宽度是相对于父元素的content-box宽度计算的，绝对定位的宽度是相对于第一个position不为static的祖先元素计算的。
+
+- 根元素html被称为“初始包含块”，其尺寸等同于浏览器可视窗口的大小。
+- position是relative或static的元素，“包含块”是最近的块容器祖先盒的content-box边界形成。
+- position是fixed的元素，则“包含块”是“初始包含块”。
+- position是absolute的元素，则“包含块”由最近的position不为static的祖先元素建立。
+
+如果该祖先元素是inline元素： 
+(1). 假设给内联元素的前后各生成一个宽度为0的内联盒子，则这两个内联盒子的padding box外面的包围盒就是内联元素的“包含块”。
+(2). 如果该内联元素被跨行分隔了，那么“包含块”未定义。
+否则该祖先元素不是inline元素，“包含块”由该祖先元素的padding box边界形成。
+如果没有符合的祖先元素，则“包含块”是“初始包含块”。
+
+absolute绝对定位元素的“包含块”有3个明显差异：
+1. 内联元素也可以作为“包含块”所在的元素
+2. “包含块”所在的元素不是父块级元素，而是最近的position不为static的祖先元素或根元素
+3. 边界是padding box而不是content box。
+
+
+ ``` html
+<style>
+  span {
+    position: absolute;
+  }
+  big {
+    font-size: 30px;
+  }
+</style>
+<body>
+  <span>我是很大的<big>111</big>哦</span>
+</body>
+ ```
+
+> 此时span元素的包含块范围与big元素毫无关系，内联元素的包含块是由生成的前后内联盒子决定的，与里面的内联盒子细节没有任何关系(span元素前后的内联盒子相关，而与span元素内部的内联盒子不相关)。
+
+
+``` html
+<style>
+  .box {
+    position: absolute;
+  }
+
+  .container {
+    width: 200px;
+    border: 1px solid pink;
+    position: relative;
+  }
+</style>
+<body>
+  <div class="container">
+    <div class="box">
+      1111
+    </div>
+  </div>
+</body>
+```
+>此时box的宽度就是文字的宽度，表现为包裹性。
+
+``` html
+<style>
+  .box {
+    position: absolute;
+  }
+
+  .container {
+    width: 200px;
+    border: 1px solid pink;
+    position: relative;
+  }
+</style>
+<body>
+  <div class="container">
+    <div class="box">
+      111111111111111111111111111111111111111111111111111111111111111111111111
+    </div>
+    <div class="box">
+      我是文字我是文字我是文字我是文字我是文字我是文字我是文字我是文字我是文字我是文字我是文字我是文字
+    </div>
+  </div>
+</body>
+```
+
+> 此时第一个box不换行，第二个box宽度是container的宽度，是因为被container包含块限制了宽度。因此决定定位的默认最大宽度是“包含块”的宽度，表现为自适应性。需要注意container高度塌陷是因为absolute元素脱离了正常流。此时如果给box元素设置一个max-width:100%是多余的，因为absolute元素默认的最大宽度就是包含块的宽度。需要注意的是有的时候纯表现为包裹性会有换行效果，如果要不换行可以设置white-space:nowrap。
+
+最后需要注意的是计算和定位是相对于祖先定位元素的padding box，这和overflow隐藏的是padding box边界类似，是使用场景决定的。
+
+
+``` html
+<style>
+  .container {
+    width: 200px;
+    height: 200px;
+    padding: 50px;
+    background-color: pink;
+    position: relative;
+  }
+  .box {
+    position: absolute;
+    top: 0;
+    right: 0;
+  }
+</style>
+<body>
+  <div class="container">
+    我是内容
+    <div class="box">
+      小图标
+    </div>
+  </div>
+</body>
+```
+> 此时box在container的padding区域内。而不是定位在container的content box区域的右上角。
+
+如果想要定位在内容区域的右上角，此时不应该使用padding，因为使用padding需要对top和left设置padding值
+
+``` html
+<style>
+  .container {
+    width: 200px;
+    height: 200px;
+    padding: 50px;
+    background-color: pink;
+    position: relative;
+  }
+  .box {
+    position: absolute;
+    top: 50px;
+    right: 50px;
+  }
+</style>
+<body>
+  <div class="container">
+    我是内容
+    <div class="box">
+      小图标
+    </div>
+  </div>
+</body>
+```
+
+> 此时如果padding值变化了，那么top和right值也需要跟着变化，从而使得维护性下降。
+
+此时可以使用border属性模拟padding从而达到同样的效果
+
+``` html
+<style>
+  .container {
+    width: 200px;
+    height: 200px;
+    border: 50px solid transparent;
+    background-color: pink;
+    position: relative;
+  }
+  .box {
+    position: absolute;
+    top: 0;
+    right: 0;
+  }
+</style>
+<body>
+  <div class="container">
+    我是内容
+    <div class="box">
+      小图标
+    </div>
+  </div>
+</body>
+```
