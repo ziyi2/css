@@ -5295,3 +5295,108 @@ absolute绝对定位元素的“包含块”有3个明显差异：
   </div>
 </body>
 ```
+
+
+#### 具有相对特性的无依赖absolute绝对定位
+
+一个绝对定位元素没有任何left/top/right/bottom属性设置，并且其祖先元素全部都是非定位元素，其位置还是再当前位置。
+
+absolute是非常独立的css属性值，其样式和行为表现不依赖其他任何CSS属性就可以完成。
+
+``` html
+<style>
+  .container {
+    width: 200px;
+    height: 200px;
+    border: 50px solid transparent;
+    background-color: pink;
+  }
+  .box {
+    position: absolute;
+  }
+</style>
+<body>
+  <div class="container">
+    <div class="box">
+      小图标
+    </div>
+    我是内容
+  </div>
+</body>
+```
+> 此时小图标和我是内容重叠在了一起。事实上小图标的位置仍然在原来的位置，不需要父元素设置relative，并且box元素也没有设置left/top/right/bottom属性值的绝对定位称为“无依赖绝对定位”。“无依赖绝对定位”本质上就是“相对定位”，仅仅是不占据CSS流的尺寸空间而已。
+
+
+
+``` html
+<style>
+  .nav {
+    display: table;
+    table-layout: fixed;
+    width: 100%;
+    max-width: 600px;
+    margin: 1em auto;
+    background-color: pink;
+    text-align: center;
+  }
+  .nav-list {
+    display: table-cell;
+    font-weight: 400;
+  }
+  .nav-a {
+    display: block;
+    line-height: 20px;
+    padding: 20px;
+    color: white;
+    text-decoration: none;
+  }
+  .nav .nav-list a i {
+    position: absolute;
+    margin: -6px 0 0 6px;
+  }
+
+</style>
+<body>
+  <div class="nav">
+    <h4 class="nav-list">
+      <a class="nav-a">普通导航<i class="fa fa-check-square-o"></i></a>
+    </h4>
+    <h4 class="nav-list">
+      <a class="nav-a">热门导航<i class="fa fa-bell-alt"></i></a>
+    </h4>
+    <h4 class="nav-list">
+      <a class="nav-a">新导航<i class="fa fa-step-backward"></i></a>
+    </h4>
+  </div>
+</body>
+```
+> 此时的i元素就是在原来位置不变的基础上进行了margin偏移这种定位的方法兼容性良好，如果i标签需要下架处理，只需要删除对应的HTML和CSS即可，日后维护也很方便。更关键的是，如果导航中的文字发生变化，图标依然定位良好，“无依赖绝对定位”的图标是自动跟随文字后面显示的。此时如果需要给父元素设置positon:relative然后使用right/top定位，文字长度一旦发生变化，则CSS代码很有可能需要重新调整。
+
+
+需要注意的是普通的水平对齐图标也可以使用“无依赖绝对定位”
+
+
+``` html
+<style> 
+  .alert {
+    line-height: 20px;
+    padding-left: 20px;
+  }
+
+  .alert i {
+    position: absolute;
+    margin-left: -20px;
+    width: 20px;
+    height: 20px;
+  }
+</style>
+<body>
+  <div class="alert">
+    <i class="fa fa-warning"></i> 邮件格式请正确填写！
+  </div>  
+</body>
+```
+> 使用“无依赖绝对定位”然后采用简单的margin偏移实现，兼容性良好，与inline-block对齐相比的好处在于，inline-block对齐最终的行框高度并不是20px，而是21px或者更大，因为中文下沉，图标居中，要想视觉上水平，图标vertical-align对齐要比实际低一点，会导致整个行框的高度不是预期的20px，而是比20px更大。使用“无依赖绝对定位”实现，则完全不需要担心这个问题，因为绝对定位不会改变正常流尺寸空间，就算图标变成了30px大小，行框高度依然是纯文本所在的20px高度。
+
+
+
