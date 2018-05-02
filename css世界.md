@@ -5400,3 +5400,155 @@ absolute是非常独立的css属性值，其样式和行为表现不依赖其他
 
 
 
+#### absolute与text-align
+
+只有原本是内联水平的元素绝对定位后可以受到text-align属性影响。
+
+
+``` html
+<style> 
+ p {
+   text-align: center;
+ }
+ img {
+   position: absolute;
+   width: 100px;
+ }
+</style>
+<body>
+  <div class="alert">
+    <p>
+      <img class="left" src="https://timgsa.baidu.com/timg?image&quality=80&size=b9999_10000&sec=1522831997482&di=b790721e923403adfaf7da42b65ed5be&imgtype=0&src=http%3A%2F%2Fimg.25pp.com%2Fuploadfile%2Fapp%2Ficon%2F20160830%2F1472514571151657.jpg" alt="">
+    </p>
+  </div>  
+</body>
+```
+> 由于absolute元素的display值是块状的，因此text-align是不会起作用，之所以这里受到了text-align的影响，是因为受到了“幽灵空白节点”和“无依赖绝对定位”共同作用。由于img是内联水平，p元素中存在“幽灵空白节点”，于是受到了text-align:center影响而水平居中显示。而img设置了position:absolute后，表现为“无依赖绝对定位”，因此在空白节点之后定位显示。
+
+
+### absolute与overflow
+
+如果overflow不是定位元素，同时绝对定位元素和overflow容器之间也没有定位元素， 则overflow无法对absolute元素进行裁剪。
+
+``` html
+<style> 
+ .overflow {
+   height: 100px;
+   overflow: hidden;
+ }
+
+ img {
+   height: 200px;
+   position: absolute;
+ }
+</style>
+<body>
+  <div class="overflow">
+    <img src="https://timgsa.baidu.com/timg?image&quality=80&size=b9999_10000&sec=1522831997482&di=b790721e923403adfaf7da42b65ed5be&imgtype=0&src=http%3A%2F%2Fimg.25pp.com%2Fuploadfile%2Fapp%2Ficon%2F20160830%2F1472514571151657.jpg" alt="">
+  </div>  
+</body>
+```
+
+> div元素无法对img进行裁剪。个人理解是div是正常文档流，而img脱离了文档流，所以不能被裁剪。
+
+``` html
+<style> 
+ .relative {
+   position: relative;
+ } 
+ .overflow {
+   height: 100px;
+   overflow: hidden;
+ }
+
+ img {
+   height: 200px;
+   position: absolute;
+ }
+</style>
+<body>
+  <div class="relative">
+    <div class="overflow">
+      <img src="https://timgsa.baidu.com/timg?image&quality=80&size=b9999_10000&sec=1522831997482&di=b790721e923403adfaf7da42b65ed5be&imgtype=0&src=http%3A%2F%2Fimg.25pp.com%2Fuploadfile%2Fapp%2Ficon%2F20160830%2F1472514571151657.jpg" alt="">
+    </div>
+  </div>  
+</body>
+```
+> div元素无法对img元素进行裁剪。个人理解是div是正常文档流，而img脱离了文档流，所以不能被裁剪。
+
+
+``` html
+<style> 
+ .overflow {
+   height: 100px;
+   overflow: hidden;
+   position: relative;
+ }
+
+ img {
+   height: 200px;
+   position: absolute;
+ }
+</style>
+<body>
+  <div class="overflow">
+    <img src="https://timgsa.baidu.com/timg?image&quality=80&size=b9999_10000&sec=1522831997482&di=b790721e923403adfaf7da42b65ed5be&imgtype=0&src=http%3A%2F%2Fimg.25pp.com%2Fuploadfile%2Fapp%2Ficon%2F20160830%2F1472514571151657.jpg" alt="">
+  </div>
+</body>
+```
+
+> 此时可以被裁剪。
+
+overflow元素和绝对定位元素之间有定位元素，也会被裁剪(这里感觉relative仍然是正常文档流，受到了overflow的影响，又限制了absolulte元素, 如果把.relative元素换成absolute元素，仍然不会被裁剪，因为脱离了正常文档流)。
+
+
+``` html
+<style> 
+ .overflow {
+   height: 100px;
+   overflow: hidden;
+ }
+
+ .relative {
+   position: relative;
+ }
+
+ img {
+   height: 200px;
+   position: absolute;
+ }
+</style>
+<body>
+  <div class="overflow">
+    <div class="relative">
+      <img src="https://timgsa.baidu.com/timg?image&quality=80&size=b9999_10000&sec=1522831997482&di=b790721e923403adfaf7da42b65ed5be&imgtype=0&src=http%3A%2F%2Fimg.25pp.com%2Fuploadfile%2Fapp%2Ficon%2F20160830%2F1472514571151657.jpg" alt="">
+    </div>
+  </div>
+</body>
+```
+> 此时也可以被裁剪。
+
+如果overflow的属性值不是hidden而是auto或者scroll，即使是绝对定位元素高度比overflow元素高度大，也不会出现滚动条，这里的个人理解还是因为脱离了文档流。
+
+
+``` html
+<style> 
+ .overflow {
+   height: 100px;
+   overflow: auto;
+ }
+
+ img {
+   height: 200px;
+   position: absolute;
+ }
+</style>
+<body>
+  <div class="overflow">
+    <img src="https://timgsa.baidu.com/timg?image&quality=80&size=b9999_10000&sec=1522831997482&di=b790721e923403adfaf7da42b65ed5be&imgtype=0&src=http%3A%2F%2Fimg.25pp.com%2Fuploadfile%2Fapp%2Ficon%2F20160830%2F1472514571151657.jpg" alt="">
+  </div>
+</body>
+```
+> 此时仍然是因为img脱离了正常文档流，所以overflow无法限制。
+
+
