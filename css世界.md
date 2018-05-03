@@ -5552,3 +5552,230 @@ overflow元素和绝对定位元素之间有定位元素，也会被裁剪(这�
 > 此时仍然是因为img脱离了正常文档流，所以overflow无法限制。
 
 
+### absolute与clip
+
+裁剪属性clip要起作用，那么元素必须是绝对定位或者固定定位元素。
+
+#### clip属性
+
+1. fixed固定定位的裁剪
+
+对于普通元素或者绝对定位元素，想要对其进行裁剪，可以使用overflow属性，但是对于position:fixed元素，overflow往往就力不能及。
+
+2. 最佳可访问性隐藏
+
+例如优化SEO以及无障碍识别
+
+``` html
+<style> 
+ .logo h1 {
+   position: absolute;
+   clip: rect(0 0 0 0);
+ }
+</style>
+<body>
+  <a href="/" class="logo">
+    <h1>ziyi2</h1>
+  </a>
+</body>
+```
+> 一种方法是使用display:none或者hidden，屏幕阅读器会忽略这里的文字，这显然不是最好的方法。text-indent缩进，但是如果缩进到屏幕阅读器之外，也是不会读取的。color:transparent是移动端的上策，桌面端有IE8浏览器兼容性问题。clip裁剪是隐藏的上策，既满足视觉隐藏，屏幕阅读器设备也能支持。
+
+
+``` html
+<style> 
+ .clip {
+   position: absolute;
+   clip: rect(0 0 0 0);
+ }
+</style>
+<body>
+  <form>
+    <input type="submit" id="ziyi2" class="clip">
+    <label for="ziyi2">提交</label>
+  </form>
+</body>
+```
+
+> 为了解决input在IE7下的样式不统一问题，可以使用label代替input的行为。label没有内置UI，兼容性良好。
+
+- display:none或者visibility:hidden隐藏两个问题，一个是按钮无法被focus，另外一个是IE8下提交行为丢失。
+- 透明度0在移动端推荐，但是在桌面端成本较高。
+- 还有一种具有适用性的“可访问隐藏”，屏幕外隐藏
+
+``` html
+<style> 
+ .abs-out {
+   position: absolute;
+   left: -999px;
+   top: -999px;
+ }
+</style>
+```
+> 此种方法会有一个问题，就是当一个控件元素被focus的时候，浏览器会自动改变滚动高度，让控件元素在屏幕内显示，如果label提交按钮在第二屏，点击按钮的时候浏览器会自动跳到第一屏置顶，因为按钮隐藏在了屏幕外，而clip就地裁剪，不会又页面跳动的问题。
+
+#### 深入理解clip
+
+``` html
+<style> 
+ .overflow {
+   width: 117px;
+   height: 50px;
+   position: relative;
+   overflow: auto;
+ }
+
+ .overflow > img {
+   width: 100px;
+   height: 100px;
+   position: absolute;
+ }
+</style>
+<body>
+  <div class="overflow">
+    <img src="https://timgsa.baidu.com/timg?image&quality=80&size=b9999_10000&sec=1522831997482&di=b790721e923403adfaf7da42b65ed5be&imgtype=0&src=http%3A%2F%2Fimg.25pp.com%2Fuploadfile%2Fapp%2Ficon%2F20160830%2F1472514571151657.jpg" alt="">
+  </div>
+</body>
+```
+
+> 此时产生滚动条。
+
+``` html
+<style> 
+ .overflow {
+   width: 117px;
+   height: 50px;
+   position: relative;
+   overflow: auto;
+ }
+
+ .overflow > img {
+   width: 100px;
+   height: 100px;
+   position: absolute;
+ }
+</style>
+<body>
+  <div class="overflow">
+    <img src="https://timgsa.baidu.com/timg?image&quality=80&size=b9999_10000&sec=1522831997482&di=b790721e923403adfaf7da42b65ed5be&imgtype=0&src=http%3A%2F%2Fimg.25pp.com%2Fuploadfile%2Fapp%2Ficon%2F20160830%2F1472514571151657.jpg" alt="">
+  </div>
+</body>
+```
+> 此时滚动条并没有消失，但是图片已经视觉不可见。在chrome下，clip仅仅决定了哪一部分不可见，对于原来占据的空间并无影响。但是在ie和firefox下是没有滚动条的，这是一种未定义行为。但是下面这些特性是所有浏览器基本上都一致的：使用clip进行裁剪的元素其clientWidth和clientHeight包括样式计算的宽高都还是原来的大小。
+
+clip仅仅决定了哪部分可见，非可见部分无法响应点击事件。
+
+
+### absolute的流体特性
+
+#### left/top/right/bottom属性
+
+当absolute遇到left/top/right/bottom属性的时候，absolute元素才真正变成绝对定位元素。如果设置了left/top或者right/bottom属性，则其相对特性丢失，如果仅仅设置left/right或者top/bottom，则垂直方向或者水平方向仍然保持相对特性。
+
+#### absolute的流体特性
+
+“对立方向同时发生定位的时候”（其中left和right、top和bottom属于对立方向），绝对定位元素具有流体特性。
+
+``` html
+<style> 
+ .absolute {
+   position: absolute;
+   left: 0;
+   background-color: pink;
+ }
+</style>
+<body>
+  <div class="absolute">
+  </div>
+</body>
+```
+
+> 此时只设置了left属性值，因此绝对定位元素表现为包裹性，宽度是0。
+
+
+``` html
+<style> 
+ .absolute {
+   position: absolute;
+   left: 0;
+   right: 0;
+   background-color: pink;
+ }
+</style>
+<body>
+  <div class="absolute">
+  </div>
+</body>
+```
+
+> 此时表现为水平流体特性，宽度表现为“格式化宽度”，宽度大小自适应于.absolute包含块的padding-box。如果padding-box宽度发生变化，则.absolute的宽度也会跟着变化。
+
+
+``` html
+<style> 
+ .absolute {
+   position: absolute;
+   left: 0;
+   right: 0;
+   top: 0;
+   bottom: 0;  
+   background-color: pink;
+ }
+</style>
+<body>
+  <div class="absolute">
+  </div>
+</body>
+```
+
+> 此时水平和垂直方向都表现为流体特性。需要注意此时不应该给.absolute元素设置宽度100%，这样会丢失流体特性。垂直方向保持了流动性之后，子元素的高度百分比值可以生效，所以高度自适应、高度等比例布局可以从容实现。
+
+``` html
+<style> 
+ .absolute {
+   position: absolute;
+   left: 0;
+   right: 0;
+   top: 0;
+   bottom: 0;  
+   width: 100%;
+   padding: 100px;
+   background-color: pink;
+ }
+</style>
+<body>
+  <div class="absolute">
+  </div>
+</body>
+```
+
+> 此时会出现水平滚动条，失去了流体特性。
+
+#### sbsoulte的margin:auto居中
+
+当absolute绝对定位元素处于流体状态的时候，盒模型相关属性的解析和普通流体元素一模一样。
+
+此时使用margin:auto不仅可以让元素水平居中，还可以让元素垂直居中（如果绝对定位元素在水平和垂直方向都保持了流体特性）。
+
+``` html
+<style> 
+ .absolute {
+   position: absolute;
+   left: 0;
+   right: 0;
+   top: 0;
+   bottom: 0;  
+   width: 100px;
+   height: 100px;
+   margin: auto;
+   background-color: pink;
+ }
+</style>
+<body>
+  <div class="absolute">
+  </div>
+</body>
+```
+
+
+
