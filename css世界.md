@@ -5776,6 +5776,252 @@ clip仅仅决定了哪部分可见，非可见部分无法响应点击事件。
   </div>
 </body>
 ```
+### position:relative
+
+#### relative对absolute的限制
+
+``` html
+<style> 
+ .absolute {
+   position: absolute;
+   left: 0;
+   right: 0;
+   top: 0;
+   bottom: 0;  
+   margin: auto;
+   background-color: pink;
+ }
+
+ .relative {
+   width: 20px;
+   height: 20px;
+   position: relative;
+ }
+</style>
+<body>
+  <div class="relative">
+    <div class="absolute">
+    </div>
+  </div>
+</body>
+```
+
+> 此时absolute元素的包含块是relative元素。
+
+#### relative与定位
+
+relative定位是相对于自身的原始位置进行定位，并且定位后原始位置的空间保留。相对定位元素同时应用对立方向定位时，由于默认的文档流是自上而下、从左往右，因此top/bottom同时使用时，bottom被忽视，left/right同时使用时，right被忽视。
 
 
+#### relative的最小化影响原则
+
+- 尽量不使用realtive，如果想定位某些元素，观察是否可使用“无依赖绝对定位”
+- 如果场景受限，一定要使用relative，则该relative务必最小化
+
+相对于普通元素，定位元素的层叠顺序更高。
+
+
+### position:fixed
+
+fixed固定定位元素的“包含块”是根元素，近似可看成html元素。因此relative和absolute元素对fixed元素没有任何的限制作用。
+
+``` html
+<style> 
+ .fixed {
+   position: fixed;
+   top: 0;
+   right: 0;
+   width: 50px;
+   height: 50px;
+   background-color: pink;
+ }
+
+ .relative {
+   width: 20px;
+   height: 20px;
+   position: relative;
+ }
+</style>
+<body>
+  <div class="relative">
+    <div class="fixed">
+    </div>
+  </div>
+</body>
+```
+
+> 此时fixed元素并不会被relative元素限制。
+
+#### position:fixed与背景锁定
+
+蒙层弹窗是网页中常见的交互，黑色半透明全屏幕覆盖的蒙层基本上是使用position:fixed定位实现。但是无法覆盖右侧的滚动栏。鼠标滚动的时候后面的背景仍然可以被滚动。可以滚动的元素是根元素，正好是fixed元素的包含块。如果希望背景被锁定，可以使用absolute模拟fixed定位，让页面滚动条由内部的普通元素产生。
+
+``` html
+<style> 
+ html,body {
+   height: 100%;
+   overflow: hidden;
+ }
+ .page {
+   height: 100%;
+   overflow: auto;
+ }   
+ .fixed {
+   position: absolute;
+   top: 0;
+   right: 0;
+   left: 0;
+   bottom: 0;
+   background-color: darkgray;
+ }
+</style>
+<body>
+  <div class="fixed">固定定位元素</div>
+  <div class="page">
+    <br><br><br><br><br><br>
+    <br><br><br><br><br><br>
+    <br><br><br><br><br><br>
+    <br><br><br><br><br><br>
+    <br><br><br><br><br><br>
+    <br><br><br><br><br><br>
+    <br><br><br><br><br><br>
+    <br><br><br><br><br><br>
+    <br><br><br><br><br><br>
+    <br><br><br><br><br><br>
+    <br><br><br><br><br><br>
+    <br><br><br><br><br><br>
+    <br><br><br><br><br><br>
+    <br><br><br><br><br><br>
+    <br><br><br><br><br><br>
+    <br><br><br><br><br><br>
+    <br><br><br><br><br><br>
+    <br><br><br><br><br><br>
+  </div>
+</body>
+```
+> 根元素直接overflow:hidden；滚动条就会消失，滚动条消失会导致页面可用宽度变化，会产生晃动问题，此时只要使用同等宽度透明的border填充消失的滚动条即可。
+### position:relative
+
+#### relative对absolute的限制
+
+``` html
+<style> 
+ .absolute {
+   position: absolute;
+   left: 0;
+   right: 0;
+   top: 0;
+   bottom: 0;  
+   margin: auto;
+   background-color: pink;
+ }
+
+ .relative {
+   width: 20px;
+   height: 20px;
+   position: relative;
+ }
+</style>
+<body>
+  <div class="relative">
+    <div class="absolute">
+    </div>
+  </div>
+</body>
+```
+
+> 此时absolute元素的包含块是relative元素。
+
+#### relative与定位
+
+relative定位是相对于自身的原始位置进行定位，并且定位后原始位置的空间保留。相对定位元素同时应用对立方向定位时，由于默认的文档流是自上而下、从左往右，因此top/bottom同时使用时，bottom被忽视，left/right同时使用时，right被忽视。
+
+
+#### relative的最小化影响原则
+
+- 尽量不使用realtive，如果想定位某些元素，观察是否可使用“无依赖绝对定位”
+- 如果场景受限，一定要使用relative，则该relative务必最小化
+
+相对于普通元素，定位元素的层叠顺序更高。
+
+
+### position:fixed
+
+fixed固定定位元素的“包含块”是根元素，近似可看成html元素。因此relative和absolute元素对fixed元素没有任何的限制作用。
+
+``` html
+<style> 
+ .fixed {
+   position: fixed;
+   top: 0;
+   right: 0;
+   width: 50px;
+   height: 50px;
+   background-color: pink;
+ }
+
+ .relative {
+   width: 20px;
+   height: 20px;
+   position: relative;
+ }
+</style>
+<body>
+  <div class="relative">
+    <div class="fixed">
+    </div>
+  </div>
+</body>
+```
+
+> 此时fixed元素并不会被relative元素限制。
+
+#### position:fixed与背景锁定
+
+蒙层弹窗是网页中常见的交互，黑色半透明全屏幕覆盖的蒙层基本上是使用position:fixed定位实现。但是无法覆盖右侧的滚动栏。鼠标滚动的时候后面的背景仍然可以被滚动。可以滚动的元素是根元素，正好是fixed元素的包含块。如果希望背景被锁定，可以使用absolute模拟fixed定位，让页面滚动条由内部的普通元素产生。
+
+``` html
+<style> 
+ html,body {
+   height: 100%;
+   overflow: hidden;
+ }
+ .page {
+   height: 100%;
+   overflow: auto;
+ }   
+ .fixed {
+   position: absolute;
+   top: 0;
+   right: 0;
+   left: 0;
+   bottom: 0;
+   background-color: darkgray;
+ }
+</style>
+<body>
+  <div class="fixed">固定定位元素</div>
+  <div class="page">
+    <br><br><br><br><br><br>
+    <br><br><br><br><br><br>
+    <br><br><br><br><br><br>
+    <br><br><br><br><br><br>
+    <br><br><br><br><br><br>
+    <br><br><br><br><br><br>
+    <br><br><br><br><br><br>
+    <br><br><br><br><br><br>
+    <br><br><br><br><br><br>
+    <br><br><br><br><br><br>
+    <br><br><br><br><br><br>
+    <br><br><br><br><br><br>
+    <br><br><br><br><br><br>
+    <br><br><br><br><br><br>
+    <br><br><br><br><br><br>
+    <br><br><br><br><br><br>
+    <br><br><br><br><br><br>
+    <br><br><br><br><br><br>
+  </div>
+</body>
+```
+> 根元素直接overflow:hidden；滚动条就会消失，滚动条消失会导致页面可用宽度变化，会产生晃动问题，此时只要使用同等宽度透明的border填充消失的滚动条即可。
 
