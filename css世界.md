@@ -6056,4 +6056,70 @@ z-index属性只有和定位元素(position不为static的元素)在一起的时
 - 6. z-index:auto或者z-index:0
 - 7. 正z-index
 
-> 每一个层叠顺序仅适用于当前层叠上下文元素的小世界。内联元素的层叠顺序比浮动元素高是因为浮动元素用于布局，而内联元素用于显示内容，内容当然优先显示。
+> 每一个层叠顺序仅适用于当前层叠上下文元素的小世界。内联元素的层叠顺序比浮动元素高是因为浮动元素用于布局，而内联元素用于显示内容，内容当然优先显示。background/border为装饰属性，浮动元素和块状元素一般用作布局，而内联元素都是内容，因为内容的层叠顺序最高（网页中最重要的当然是内容）。
+
+### 层叠准则
+
+- 谁大谁上：在同一个层叠上下文中，层叠水平值大的覆盖小的。
+- 后来居上：当元素的层叠水平一致、层叠顺序相同的时候，在DOM流中处于后面的元素会覆盖前面的元素。
+
+### 层叠上下文
+
+#### 层叠上下文的特性
+
+- 层叠上下文的层叠水平比普通元素高
+- 层叠上下文可以嵌套，内部层叠上下文及其所有子元素均受制于外部层叠上下文
+- 每个层叠上下文和兄弟元素独立，进行层叠变化或渲染的时候，只需要考虑后台元素
+- 每个层叠上下文是自成体系的，当元素发生层叠的时候，整个元素被认为是父层叠上下文的层叠顺序中
+
+#### 层叠上下文的创建
+
+和块状格式化上下文一样，层叠上下文也由一些特定的CSS属性创建
+
+- 页面根元素天生具有层叠上下文，称为根层叠上下文
+- z-index值为数值的定位元素的传统层叠上下文
+- 其他CSS3属性
+
+1. 根层叠上下文
+
+html元素，因此页面中所有元素一定处于至少一个层叠结界中
+
+2. 定位元素与传统层叠上下文
+
+
+``` html
+<style> 
+  .first, .last {
+    z-index: auto;
+    position: relative;
+  }
+
+  img {
+    width: 100px;
+  }
+
+  .first img {
+    position: absolute;
+    z-index: 2;
+  }
+
+  .last img {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    z-index: 1;
+  }
+ 
+</style>
+<body>
+  <div class="first">
+    <img src="https://timgsa.baidu.com/timg?image&quality=80&size=b9999_10000&sec=1522831997482&di=b790721e923403adfaf7da42b65ed5be&imgtype=0&src=http%3A%2F%2Fimg.25pp.com%2Fuploadfile%2Fapp%2Ficon%2F20160830%2F1472514571151657.jpg" alt="">
+  </div>
+  <div class="last">
+    <img src="https://timgsa.baidu.com/timg?image&quality=80&size=b9999_10000&sec=1522831997482&di=b790721e923403adfaf7da42b65ed5be&imgtype=0&src=http%3A%2F%2Fimg.25pp.com%2Fuploadfile%2Fapp%2Ficon%2F20160830%2F1472514571151657.jpg" alt="">
+  </div>
+</body>
+```
+
+> 此时z-index:2的图片位于上面，符合预期效果。
+
