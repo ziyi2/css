@@ -6048,7 +6048,7 @@ z-index属性只有和定位元素(position不为static的元素)在一起的时
 
 在CSS2.1的世界里，层叠顺序的规则使
 
-- 1. 层叠上下文(backgroun/border)
+- 1. 层叠上下文的backgroun/border
 - 2. 负z-index
 - 3. block块状水平盒子
 - 4. float浮动盒子
@@ -6121,5 +6121,140 @@ html元素，因此页面中所有元素一定处于至少一个层叠结界中
 </body>
 ```
 
-> 此时z-index:2的图片位于上面，符合预期效果。
+> 此时z-index:2的图片位于上面，符合预期效果。如果此时将div元素的z-index:auto改为z-index:0会发现后者覆盖了前者，正好相反。需要注意的是z-index:auto并没有创建定位元素的传统层叠上下文，因此div元素是一个普通定位元素，于是两个img元素的层叠比较不受父级影响，按照层叠准则谁大谁上，在同一个根层叠上下文中，谁大谁上。而z-index:0是设置了准确的数值，因此两个div元素各自创建了一个传统层叠上下文，两个上下文自成体系，根据层叠上下文特性的最后一条，两个img元素受制于各自父元素div的层叠顺序，两个div元素的层叠水平一样（z-index都为0），因此根据后来居上的原则，第二个div元素会覆盖第一个div元素，就算第一个div元素里的img的z-index为无穷大，此时第二个div元素的img仍然会覆盖第一个div的img元素。此时img元素的z-index没起作用。
+
+
+3. CSS3的层叠上下文
+
+- 1）flex布局元素，同时z-index不为auto
+- 2）opacity值不为1
+- 3）transform值不是none
+- 4）mix-blend-mode值不为normal
+- 5）filter值不为none
+- 6）isolation值不是isolate
+- 7）will-change属性值为2）~6）的任意一个（will-change:opacity等）
+- 8）-webkit-overflow-scrolling设为touch
+
+#### 层叠上下文与层叠顺序
+
+一旦普通元素具有了层叠上下文，层叠顺序会变高。
+
+- 如果层叠上下文元素不依赖z-index数值，其层叠顺序是z-index:auto，可看成z-index:0级别
+- 如果层叠上下文依赖z-index数值，则层叠顺序由z-index值决定
+
+因此可以对层叠顺序图进行修改
+
+- 1. 层叠上下文的backgroun/border
+- 2. 负z-index
+- 3. block块状水平盒子
+- 4. float浮动盒子
+- 5. inline水平盒子
+- 6. z-index:auto或者z-index:0，这里新增不依赖z-index的层叠上下文
+- 7. 正z-index
+
+一旦元素变成定位元素，那么z-index会自动生效，此时默认就是auto，因为定位元素会覆盖inline/block/float元素。需要注意不依赖z-index层叠上下文的元素和z-index:auto的定位元素是在同一个层叠顺序，因此遵循后来居上的原则。
+
+``` html
+<style> 
+  img {
+    width: 100px;
+  }
+  img:first-child {
+    position: relative;
+  }
+  img:last-child {
+    transform: scale(2);
+  }
+</style>
+<body>
+  <img src="https://timgsa.baidu.com/timg?image&quality=80&size=b9999_10000&sec=1522831997482&di=b790721e923403adfaf7da42b65ed5be&imgtype=0&src=http%3A%2F%2Fimg.25pp.com%2Fuploadfile%2Fapp%2Ficon%2F20160830%2F1472514571151657.jpg" alt="">
+  <img src="https://timgsa.baidu.com/timg?image&quality=80&size=b9999_10000&sec=1522831997482&di=b790721e923403adfaf7da42b65ed5be&imgtype=0&src=http%3A%2F%2Fimg.25pp.com%2Fuploadfile%2Fapp%2Ficon%2F20160830%2F1472514571151657.jpg" alt="">
+</body>
+```
+
+> 此时遵循后来居上的原则。两个img都创建了各自的层叠上下文，而且处于同一个层叠顺序，因此遵循后来居上的原则。
+
+
+### z-index负值的深入理解
+
+
+``` html
+<style> 
+  html {
+    background-color: pink;
+  }
+
+  div {
+    /* background-color: cyan; */
+  }
+  
+  img {
+    width: 100px;
+  }
+  img {
+    position: relative;
+    z-index: -1;
+  }
+</style>
+<body>
+  <div>
+    <img src="https://timgsa.baidu.com/timg?image&quality=80&size=b9999_10000&sec=1522831997482&di=b790721e923403adfaf7da42b65ed5be&imgtype=0&src=http%3A%2F%2Fimg.25pp.com%2Fuploadfile%2Fapp%2Ficon%2F20160830%2F1472514571151657.jpg" alt="">
+  </div>
+</body>
+
+```
+> 此时因为html是根元素，根元素创建了根层叠上下文，因此根元素的修饰属性background/border默认顺序最高，z-index负值的顺序其次，因此图片在html背景色之上。此时如果给div一个背景色，那么由于div是块状水平元素，顺序在z-index负值之后，因此div的背景色会覆盖图片。
+
+
+如果此时给div元素创建一个层叠上下文，那么图片又会显示在div元素的背景之上
+
+
+``` html
+<style> 
+  html {
+    background-color: pink;
+  }
+
+  div {
+    background-color: cyan;
+    transform: scale(1);
+  }
+  
+  img {
+    width: 100px;
+  }
+  img {
+    position: relative;
+    z-index: -1;
+  }
+</style>
+<body>
+  <div>
+    <img src="https://timgsa.baidu.com/timg?image&quality=80&size=b9999_10000&sec=1522831997482&di=b790721e923403adfaf7da42b65ed5be&imgtype=0&src=http%3A%2F%2Fimg.25pp.com%2Fuploadfile%2Fapp%2Ficon%2F20160830%2F1472514571151657.jpg" alt="">
+  </div>
+</body>
+```
+
+> 因此可以发现z-index负值渲染过程就是寻找它所在的层叠上下文元素的过程。
+
+z-index为负值的作用
+
+- 可访问性隐藏：只需要层叠上下文内的某一个父元素加个背景色就可以。与clip隐藏的优势在于无须绝对定位，并对原来的布局和元素行为没有任何影响。劣势当然是需要父元素加背景配合。
+
+- IE8下的多背景模拟
+- 定位元素的后面
+
+
+## z-index不犯二准则
+
+对于非浮层元素，避免设置z-index值，z-index值没有任何道理需要超过2。
+
+需要注意对于javascript驱动的浮层组件，需要“层级计数器”来管理
+- 总会遇到意想不到的高层级元素
+- 组件的覆盖规则具有动态性
+
+
+
+
+
 
