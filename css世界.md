@@ -6254,7 +6254,73 @@ z-index为负值的作用
 - 组件的覆盖规则具有动态性
 
 
+## 文本处理能力
 
+### font-size
+
+#### ex、em和rem
+
+ex: 字符x的高度，font-size越大，ex越大。
+
+em的大小
+
+```html
+<style> 
+  html {
+    font-size: 12px;
+  }
+
+  div {
+    font-size: 2em; // 24px = 12px * 2
+    margin-left: 0.5em; // 24px*0.5
+    margin-top: 0.5em; // 24px*0.5
+  }
+
+  p {
+    font-size: 1.5em; // 36px = 24px * 1.5
+    padding: 0.5em; // 18px = 36px * 0.5
+  }
+</style>
+<body>
+  <div>
+    div
+    <p>p</p>
+  </div>
+</body>
+
+```
+
+> 此时可以看出1em的计算值等于当前元素所在font-size计算值。这里先计算元素的font-size大小，然后再计算给其他使用em单位的属性值大小。使用相对单位的好处是样式表现更具有弹性，从而实现弹性布局。
+
+一旦div元素的font-size调整，继承div元素font-size的计算值就会调整，因此维护成本较高，由于这种限制，rem(root em)就出现了，rem是根元素em大小，em相对于当前元素，而rem相对于根元素，当前元素容易变化，而根元素是固定的
+
+``` html
+<style> 
+  html {
+    font-size: 12px;
+  }
+  div {
+    font-size: 2rem; // 24px = 12px * 2
+    margin-left: 0.5rem;  // 6px = 12px * 0.5
+    margin-top: 0.5rem; // 6px = 12px * 0.5
+  }
+  p {
+    font-size: 1.5rem; // 18px = 12px * 1.5
+    padding: 0.5rem; // 6px = 12px * 0.5
+  }
+</style>
+<body>
+  <div>
+    div
+    <p>p</p>
+  </div>
+</body>
+```
+> 此时的1rem就是html的font-size大小。rem是CSS3单位，只有IE9以上才支持。
+
+#### font-size:0与文本的隐藏
+
+font-size:0可以隐藏文本。
 
 
 
