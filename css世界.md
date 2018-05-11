@@ -6323,4 +6323,16 @@ em的大小
 font-size:0可以隐藏文本。
 
 
+### 文本控制
+
+#### text-indent与内联元素缩进
+
+text-indent仅仅对第一行的内联盒子内容有效
+
+#### letter-spacing与字符间距
+
+#### word-spacing与单词间距
+
+
+
 
