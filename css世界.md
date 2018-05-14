@@ -6572,5 +6572,84 @@ display:none会把所有子元素隐藏掉，visibility:hidden默认也会将所
 > 此时还可以对隐藏元素进行尺寸和位置的获取，而display:none不行。
 
 
+## 流向的改变
 
+### 改变水平流向的direction简介
+
+- ltr: left-to-right
+- rtl: right-to-left
+
+
+可以改变替换元素、inline-block/inline-table元素的水平呈现顺序
+
+``` html
+<style> 
+  .rtl {
+    direction: rtl;
+  }
+</style>
+<body>
+  <div class="rtl">
+    <button>111</button>
+    <button>222</button>
+  </div>
+</body>
+```
+
+> 改变了button元素的呈现顺序。222显示在了111的前面。
+
+改变...的显示位置，可以让...显示在前面
+
+``` html
+<style> 
+  p {
+    width: 100px;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    direction: rtl;
+  }
+</style>
+<body>
+  <div class="rtl">
+    <p>开头111111111，中间2222222222，结尾3333333333333</p>
+  </div>
+</body>
+```
+
+> 注意不会改变文字的顺序，如果要改变文字的顺序，需要借助unicode-bidi属性。
+
+###改变纵横规则的write-mode
+
+在CSS2中，外边距合并只会出现在垂直方向上，但是有了write-mode后，在水平方向上也可能出现外边距合并。因此元素的合并有效方向是流向的垂直方向。
+
+除此之外，可以使用margin:auto实现普通块状元素的垂直居中
+
+``` html
+<style> 
+  .tb {
+    writing-mode: tb-lr; /* top -> bottom left -> right */
+    writing-mode: vertical-lr;
+    -webkit-writing-mode: vertical-lr;
+    width: 100px;
+    height: 100px;
+    background-color: pink;
+  }
+  .tb div {
+    width: 100%;
+    height: 50px;
+    background-color: aquamarine;
+    margin: auto;
+  }
+</style>
+<body>
+  <div class="tb">
+    <div></div>
+  </div>
+</body>
+```
+
+也可以通过text-align:center实现图片的垂直居中，可以使用text-indent实现文字下沉效果，也可以实现全兼容的icon fonts图标的旋转效果，充分利用高度的高度自适应布局...有了writing-mode，可以做很多事情，就怕想不到。
+
+需要注意writing-mode与direction实际上没有任何交集。只是writing-mode更为强大。
 
