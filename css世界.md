@@ -6333,6 +6333,78 @@ text-indent仅仅对第一行的内联盒子内容有效
 
 #### word-spacing与单词间距
 
+#### word-break和word-wrap的区别
 
+word-break:
+- normal: 使用默认的换行规则
+- break-all: 允许任意的CJK(chinese/Japanese/Korean)文本间的单词断行
+- keep-all: 不允许CJK文本中的单词换行，只能在半角空格或连字符处换行。非CJK文本的行为实际上和normal一致。（移动端不适用）
+
+
+word-wrap:
+
+- normal: 正常换行规则
+- break-word: 一行单词中实在没有其他靠谱的换行点的时候换行
+
+``` html
+<style> 
+  p {
+    width: 100px;
+  }
+
+ .word-break {
+   word-break: break-all;
+ }
+
+ .word-wrap {
+   word-wrap: break-word;
+ }
+</style>
+<body>
+  <p class="word-break">如果是发抵抗力复健科是打飞机方式大力hello word and this is aaaa</p>
+  <p class="word-wrap">如果是发抵抗力复健科是打飞机方式大力hello word and this is aaaa</p>
+</body>
+```
+
+> break-all在实在放不下字符的时候就换行，而break-word是单词放不下的时候才换行。
+
+#### white-space与换行和空格的控制
+
+white-space属性声明了如何处理元素内的空白符，包括Space、Enter、Tab键产生的空白。可以决定图文是否在一行显示、是否显示大段连续空白等。
+
+- normal: 合并空白符和换行符。
+- pre: 类似html的pre标签
+- nowrap: 合并空白字符，文本不会换行，直到遇到br标签
+- pre-wrap: 保留空白符序列，可以进行正常换行
+- pre-line: 合并空白字符，文本在有换行符的地方换行
+
+
+###### white-space与最大可用宽度
+
+设置为nowrap的时候，换行符合一些空格全部合并，文本一行显示。
+
+- 包含块尺寸过小处理，绝对定位和inline-block元素都具有包裹性，此时很容器表现为"一柱擎天"和非必要的换行效果，使用nowrap可以一行展示。
+
+- 单行文字溢出点点点效果
+
+#### text-align与元素对齐
+
+#### text-decoration下划线和文本重叠问题
+
+可以使用border进行模拟，并使用padding控制间隔
+
+``` html
+<style> 
+  .border {
+    text-decoration: none;
+    border-bottom: 1px solid;
+    padding-bottom: 5px;
+  }
+</style>
+<body>
+  <a href="">链接</a>
+  <a class="border" href="">链接</a>
+</body>
+```
 
 
