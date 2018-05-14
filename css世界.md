@@ -6407,4 +6407,170 @@ white-space属性声明了如何处理元素内的空白符，包括Space、Ente
 </body>
 ```
 
+## 元素的显示和隐藏
+
+- 元素不可见、不占据空间、辅助设备无法访问、不渲染，可以使用script标签隐藏
+
+``` html
+<script>
+  <img src="1.jpg"></img>
+  <textarea style="display:none;">
+    <img src="2.jpg">
+  </textarea>
+</script>
+```
+
+- 元素不可见、不占据空间、辅助设备无法访问、资源加载，DOM可访问，可以使用display:none
+
+- 元素不可见、不占据空间、辅助设备无法访问、显隐的时候可以有transition淡入淡出效果，可以使用
+
+``` html
+<style> 
+  .hidden {
+    position: absolute;
+    visibility: hidden;
+  }
+</style>
+```
+
+- 元素不可见、辅助设备无法访问、不能点击，但占据空间保留，可以使用visibility: hidden;隐藏
+
+- 元素不可见、不能点击，不占据空间保留、键盘可访问，可使用clip隐藏
+
+``` html
+<style> 
+  .clip {
+    clip: rect(0 0 0 0 );
+    position: absolute;
+  }
+  .out {
+    position: relative;
+    left: -999em;
+  }
+</style>
+```
+
+- 元素不可见、可以点击，不占据空间保留，可以使用透明度
+
+``` html
+<style> 
+  .opacity {
+    position: absolute;
+    opacity: 0;
+    z-index: -1;
+  }
+</style>
+```
+
+- 单纯希望元素不可见，位置保留，依然可以点击，直接透明度为0
+
+- 显示的时候可以加一个transition动画，可能要使用max-height进行隐藏
+
+``` html
+<style> 
+  .hidden {
+    max-height: 0;
+    overflow: hidden;
+  }
+</style>
+```
+
+### display与元素的显隐
+
+- firefox下，display:none的background-image图片不加载
+- chrome和safari下，父元素display:none图片不加载，本身背景图片所在元素display:none图片依旧会加载
+- IE下，无论怎么样都会请求图片资源
+
+> 如果不是background-image,而是img元素，则设置display:none所有浏览器下依旧会请求图片资源
+
+
+通常情况下display:none的元素不能被点击，但是一下情况例外
+
+``` html
+<body>
+  <form>
+    <input id="submit" type="submit" style="display: none">
+    <label for="submit">提交</label>
+  </form>
+</body>
+```
+
+display:none不会影响CSS3 animation动画实现，但会影响CSS3 transition过渡效果执行，因此transition过渡效果往往与visibility属性配合使用。
+
+display:none元素不会加入计数队列。
+
+
+### visibility与元素的显隐
+
+#### 不仅仅是保留空间
+
+1. 继承性
+
+display:none会把所有子元素隐藏掉，visibility:hidden默认也会将所有子元素隐藏，但是如果子元素设置了visibility:visible则又会显示元素。
+
+``` html
+<style> 
+  .hidden {
+    visibility: hidden;
+  }
+  .none {
+    display: none;
+  }
+  .block {
+    display: block;
+  }
+  .visibility {
+    visibility: visible;
+  }
+</style>
+<body>
+  <div class="none">
+    <p class="block">1</p>
+    <p>2</p>
+    <p>3</p>
+    <p>4</p>
+  </div>
+  <div class="hidden">
+    <p class="visibility">1 visibility</p>
+    <p>2 visibility</p>
+    <p>3 visibility</p>
+    <p>4 visibility</p>
+  </div>
+</body>
+```
+
+> .hidden类的子元素默认继承了父元素的visibility属性值，但是如果改变这个继承值，则子元素仍然是可以显示出来的。
+
+2. visibility不会影响计数器的计数
+
+3. visibility与transition
+
+``` html
+<style> 
+  .hidden p {
+    visibility: hidden;
+    /* 不占据空间 */
+    /* position: absolute; */
+    opacity: 0;
+    transition: opacity .25s;
+  }
+
+  div:hover p {
+    visibility: visible;
+    opacity: 1;
+  }
+
+</style>
+<body>
+  <div class="hidden">
+    <p>2 visibility</p>
+    <p>3 visibility</p>
+    <p>4 visibility</p>
+  </div>
+</body>
+```
+> 此时还可以对隐藏元素进行尺寸和位置的获取，而display:none不行。
+
+
+
 
